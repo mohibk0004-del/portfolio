@@ -4,6 +4,7 @@ import { BootSequence } from './components/BootSequence';
 import { AsciiCpuCanvas } from './components/AsciiCpuCanvas';
 import handsImage from './assets/hands.png';
 import handsDarkImage from './assets/hands_black.png';
+import handsHackImage from './assets/hands_hack.png';
 import {
   SiC,
   SiCplusplus,
@@ -133,6 +134,10 @@ const heartStream = Array.from({ length: 22 }, (_, index) => ({
   delay: `${(index % 7) * 0.55}s`,
 }));
 
+const glitchTargets = ['topbar', 'hero', 'terminal', 'matrix', 'projects'] as const;
+
+type GlitchTarget = (typeof glitchTargets)[number] | null;
+
 function Icon({ kind }: { kind: 'about' | 'projects' | 'stack' | 'dark' | 'web' | 'mail' | 'home' | 'contact' }) {
   switch (kind) {
     case 'about':
@@ -200,6 +205,7 @@ function App() {
   const [booting, setBooting] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [hackThemeActive, setHackThemeActive] = useState(false);
+  const [glitchTarget, setGlitchTarget] = useState<GlitchTarget>(null);
   const [heartsActive, setHeartsActive] = useState(false);
   const [heartsKey, setHeartsKey] = useState(0);
   const [terminalUnlocked, setTerminalUnlocked] = useState(false);
@@ -230,7 +236,42 @@ function App() {
     window.localStorage.setItem('portfolio-theme', isDarkMode ? 'dark' : 'light');
   }, [isDarkMode, hackThemeActive]);
 
-  const heroImage = hackThemeActive || isDarkMode ? handsDarkImage : handsImage;
+  useEffect(() => {
+    if (!hackThemeActive) {
+      setGlitchTarget(null);
+      return;
+    }
+
+    let cancelled = false;
+    let loopTimer: number | undefined;
+    let pulseTimer: number | undefined;
+
+    const queuePulse = () => {
+      const wait = 1400 + Math.random() * 4200;
+      loopTimer = window.setTimeout(() => {
+        if (cancelled) return;
+
+        const nextTarget = glitchTargets[Math.floor(Math.random() * glitchTargets.length)];
+        setGlitchTarget(nextTarget);
+
+        pulseTimer = window.setTimeout(() => {
+          if (!cancelled) setGlitchTarget(null);
+        }, 220);
+
+        queuePulse();
+      }, wait);
+    };
+
+    queuePulse();
+
+    return () => {
+      cancelled = true;
+      if (loopTimer) window.clearTimeout(loopTimer);
+      if (pulseTimer) window.clearTimeout(pulseTimer);
+    };
+  }, [hackThemeActive]);
+
+  const heroImage = hackThemeActive ? handsHackImage : isDarkMode ? handsDarkImage : handsImage;
 
   const handleTerminalSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -271,7 +312,7 @@ function App() {
   };
 
   return (
-    <div className="page-shell">
+    <div className={`page-shell${glitchTarget ? ` glitching glitch-${glitchTarget}` : ''}`}>
       <AnimatePresence>
         {booting && <BootSequence onComplete={() => setBooting(false)} />}
       </AnimatePresence>

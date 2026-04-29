@@ -40,6 +40,24 @@
   --hero-subtitle: #4c4944;
 }
 
+:root[data-theme='hack'] {
+  --bg: #020202;
+  --bg-soft: #020202;
+  --surface: rgba(2, 2, 2, 0.9);
+  --surface-solid: #020202;
+  --text: #00f6ac;
+  --muted: #97f9da;
+  --line: rgba(0, 246, 172, 0.84);
+  --line-soft: rgba(0, 246, 172, 0.44);
+  --shadow: rgba(0, 246, 172, 0.2);
+  --bloom: rgba(0, 246, 172, 0.14);
+  --bloom-opacity: 0.12;
+  color-scheme: dark;
+  --hero-eyebrow: #00f6ac;
+  --hero-title: #ffffff;
+  --hero-subtitle: #00f6ac;
+}
+
 html {
   scroll-behavior: smooth;
   background: var(--bg);
@@ -128,6 +146,73 @@ button {
   background: transparent;
 }
 
+.page-shell.glitching::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(0, 246, 172, 0.08) 0,
+    rgba(0, 246, 172, 0.08) 2px,
+    transparent 2px,
+    transparent 6px
+  );
+  mix-blend-mode: screen;
+  opacity: 0.55;
+  z-index: 7;
+  animation: glitch-static 220ms steps(2, end) 1;
+}
+
+.page-shell.glitching.glitch-topbar .topbar,
+.page-shell.glitching.glitch-hero .hero__title,
+.page-shell.glitching.glitch-terminal .terminal-box,
+.page-shell.glitching.glitch-matrix .chip,
+.page-shell.glitching.glitch-projects .ledger-row {
+  animation: glitch-jump 220ms steps(2, end) 1;
+}
+
+.page-shell.glitching.glitch-topbar .topbar__brand,
+.page-shell.glitching.glitch-hero .hero__subtitle,
+.page-shell.glitching.glitch-terminal .terminal-box__message,
+.page-shell.glitching.glitch-matrix .stack-group h3,
+.page-shell.glitching.glitch-projects .visit-link {
+  text-shadow: 1px 0 #00f6ac, -1px 0 #ffffff;
+  animation: glitch-flicker 220ms steps(2, end) 1;
+}
+
+@keyframes glitch-jump {
+  0% {
+    transform: translate3d(0, 0, 0) skewX(0deg);
+    filter: saturate(1);
+  }
+  35% {
+    transform: translate3d(2px, -1px, 0) skewX(-3deg);
+    filter: saturate(1.6);
+  }
+  62% {
+    transform: translate3d(-2px, 1px, 0) skewX(3deg);
+    filter: saturate(0.7);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) skewX(0deg);
+    filter: saturate(1);
+  }
+}
+
+@keyframes glitch-flicker {
+  0% { opacity: 1; }
+  20% { opacity: 0.65; }
+  45% { opacity: 1; }
+  68% { opacity: 0.58; }
+  100% { opacity: 1; }
+}
+
+@keyframes glitch-static {
+  0% { transform: translateY(-3px); }
+  100% { transform: translateY(2px); }
+}
+
 .page-shell::before {
   content: '';
   position: fixed;
@@ -148,6 +233,41 @@ button {
   pointer-events: none;
   background: linear-gradient(to bottom, transparent, rgba(17, 17, 17, 0.015));
   z-index: 0;
+}
+
+.amna-hearts {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 6;
+}
+
+.amna-heart {
+  position: absolute;
+  left: var(--heart-left);
+  bottom: -14vh;
+  font-family: var(--font-mono);
+  font-size: var(--heart-size);
+  color: #00f6ac;
+  opacity: 0;
+  text-shadow: 0 0 10px rgba(0, 246, 172, 0.74);
+  animation: amna-heart-rise var(--heart-duration) linear infinite;
+  animation-delay: var(--heart-delay);
+}
+
+@keyframes amna-heart-rise {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.95) rotate(-8deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate3d(-12px, -112vh, 0) scale(1.05) rotate(8deg);
+    opacity: 0;
+  }
 }
 
 .topbar {
