@@ -11,8 +11,6 @@
   --line: rgba(17, 17, 17, 0.86);
   --line-soft: rgba(17, 17, 17, 0.58);
   --shadow: rgba(17, 17, 17, 0.18);
-  --bloom: rgba(208, 170, 72, 0.34);
-  --bloom-opacity: 0.34;
   --font-serif: 'Playfair Display', 'Times New Roman', serif;
   --font-mono: 'IBM Plex Mono', 'Space Mono', 'Courier New', monospace;
   --hero-eyebrow: #4c4944;
@@ -31,8 +29,6 @@
   --line: rgba(244, 240, 232, 0.88);
   --line-soft: rgba(244, 240, 232, 0.52);
   --shadow: rgba(0, 0, 0, 0.38);
-  --bloom: rgba(255, 246, 224, 0.06);
-  --bloom-opacity: 0.16;
   color-scheme: dark;
   /* keep hero text colors identical across themes per user request */
   --hero-eyebrow: #4c4944;
@@ -50,8 +46,6 @@
   --line: rgba(0, 246, 172, 0.84);
   --line-soft: rgba(0, 246, 172, 0.44);
   --shadow: rgba(0, 246, 172, 0.2);
-  --bloom: rgba(0, 246, 172, 0.14);
-  --bloom-opacity: 0.12;
   color-scheme: dark;
   --hero-eyebrow: #00f6ac;
   --hero-title: #ffffff;
@@ -257,20 +251,6 @@ button {
   100% { transform: translate3d(0, 0, 0); }
 }
 
-.page-shell::before {
-  content: '';
-  position: fixed;
-  inset: -12vh -8vw;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 50% 18%, var(--bloom) 0%, rgba(255, 247, 228, 0.32) 18%, transparent 54%),
-    radial-gradient(circle at 18% 64%, rgba(255, 249, 236, 0.36) 0%, transparent 42%),
-    radial-gradient(circle at 82% 72%, rgba(17, 17, 17, 0.03) 0%, transparent 36%);
-  filter: blur(54px);
-  opacity: var(--bloom-opacity);
-  z-index: 0;
-}
-
 .page-noise {
   position: fixed;
   inset: 0;
@@ -293,9 +273,9 @@ button {
   bottom: -14vh;
   font-family: var(--font-mono);
   font-size: var(--heart-size);
-  color: #00f6ac;
+  color: #ff2d55;
   opacity: 0;
-  text-shadow: 0 0 10px rgba(0, 246, 172, 0.74);
+  text-shadow: 0 0 10px rgba(255, 45, 85, 0.78);
   animation: amna-heart-rise var(--heart-duration) linear infinite;
   animation-delay: var(--heart-delay);
 }
