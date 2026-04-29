@@ -43,7 +43,11 @@ const AsciiCpuCanvas = lazy(() =>
   import('./components/AsciiCpuCanvas').then((m) => ({ default: m.AsciiCpuCanvas }))
 );
 
-type ThemeKey = 'light' | 'dark' | 'hack' | 'decolumb' | 'gunmetal' | 'dubai';
+const MatrixRain = lazy(() =>
+  import('./components/MatrixRain').then((m) => ({ default: m.MatrixRain }))
+);
+
+type ThemeKey = 'light' | 'dark' | 'hack' | 'decolumb' | 'gunmetal' | 'dubai' | 'luxury';
 
 type ProjectLedger = {
   title: string;
@@ -143,13 +147,13 @@ const heartStream = Array.from({ length: 22 }, (_, index) => ({
 const THEME_OPTIONS: { key: ThemeKey; label: string }[] = [
   { key: 'light', label: 'LIGHT' },
   { key: 'dark', label: 'DARK' },
-  { key: 'hack', label: 'HACK' },
   { key: 'decolumb', label: 'DECOLUMB' },
   { key: 'gunmetal', label: 'GUNMETAL' },
   { key: 'dubai', label: 'DUBAI' },
+  { key: 'luxury', label: 'LUXURY' },
 ];
 
-const THEME_KEYS = new Set<ThemeKey>(THEME_OPTIONS.map((t) => t.key));
+const ALL_THEME_KEYS = new Set<ThemeKey>(['light', 'dark', 'hack', 'decolumb', 'gunmetal', 'dubai', 'luxury']);
 
 function Icon({ kind }: { kind: 'about' | 'projects' | 'stack' | 'dark' | 'web' | 'mail' | 'home' | 'contact' | 'theme' | 'chevron' }) {
   switch (kind) {
@@ -281,16 +285,8 @@ function App() {
 
   useEffect(() => {
     const saved = window.localStorage.getItem('portfolio-theme');
-    const unlocked = window.localStorage.getItem('portfolio-themes-unlocked') === '1';
-    if (unlocked) setThemesUnlocked(true);
-    if (saved && THEME_KEYS.has(saved as ThemeKey)) {
-      const t = saved as ThemeKey;
-      const isExtra = t !== 'light' && t !== 'dark';
-      if (isExtra && !unlocked) {
-        setTheme('light');
-      } else {
-        setTheme(t);
-      }
+    if (saved && ALL_THEME_KEYS.has(saved as ThemeKey)) {
+      setTheme(saved as ThemeKey);
     }
   }, []);
 
@@ -303,11 +299,6 @@ function App() {
     document.documentElement.dataset.bitmap = bitmapMode ? '1' : '0';
   }, [bitmapMode]);
 
-  useEffect(() => {
-    if (themesUnlocked) {
-      window.localStorage.setItem('portfolio-themes-unlocked', '1');
-    }
-  }, [themesUnlocked]);
 
   useEffect(() => {
     if (!themeMenuOpen) return;
@@ -337,7 +328,7 @@ function App() {
     const timers = new Set<number>();
 
     const queuePulse = () => {
-      const wait = 240 + Math.random() * 720;
+      const wait = 17000 + Math.random() * 6000;
       const loopTimer = window.setTimeout(() => {
         if (cancelled) return;
 
@@ -413,21 +404,22 @@ function App() {
       return;
     }
 
-    if (normalized === 'THEME') {
+    if (normalized === 'THEME' || normalized === 'THEMES') {
       setThemesUnlocked(true);
       setThemeMenuOpen(true);
       setTerminalMessage('Theme tab unlocked. Open /THEME on the top bar.');
       return;
     }
 
-    if (normalized.startsWith('THEME ')) {
-      const name = normalized.slice(6).trim().toLowerCase() as ThemeKey;
-      if (THEME_KEYS.has(name)) {
-        setThemesUnlocked(true);
+    if (normalized.startsWith('THEME ') || normalized.startsWith('THEMES ')) {
+      const after = normalized.startsWith('THEMES ') ? normalized.slice(7) : normalized.slice(6);
+      const name = after.trim().toLowerCase() as ThemeKey;
+      if (ALL_THEME_KEYS.has(name)) {
+        if (name !== 'hack') setThemesUnlocked(true);
         setTheme(name);
         setTerminalMessage(`Theme set: ${name.toUpperCase()}.`);
       } else {
-        setTerminalMessage('Unknown theme. Try LIGHT, DARK, HACK, DECOLUMB, GUNMETAL, DUBAI.');
+        setTerminalMessage('Unknown theme. Try LIGHT, DARK, DECOLUMB, GUNMETAL, DUBAI, LUXURY.');
       }
       return;
     }
@@ -449,7 +441,7 @@ function App() {
     terminalInputRef.current?.focus();
   };
 
-  const themeLabel = THEME_OPTIONS.find((t) => t.key === theme)?.label ?? 'LIGHT';
+  const themeLabel = theme === 'hack' ? 'HACK' : THEME_OPTIONS.find((t) => t.key === theme)?.label ?? 'LIGHT';
 
   return (
     <div className={`page-shell${glitching ? ` glitching glitch-v${glitchVariant}` : ''}${bitmapMode ? ' bitmap-mode' : ''}`}>
@@ -458,6 +450,12 @@ function App() {
       </AnimatePresence>
 
       <div className="page-noise" aria-hidden="true" />
+
+      {hackThemeActive && (
+        <Suspense fallback={null}>
+          <MatrixRain />
+        </Suspense>
+      )}
 
       {bitmapMode && (
         <svg className="bitmap-defs" aria-hidden="true" focusable="false">
