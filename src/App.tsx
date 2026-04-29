@@ -134,10 +134,6 @@ const heartStream = Array.from({ length: 22 }, (_, index) => ({
   delay: `${(index % 7) * 0.55}s`,
 }));
 
-const glitchTargets = ['topbar', 'hero', 'terminal', 'matrix', 'projects'] as const;
-
-type GlitchTarget = (typeof glitchTargets)[number] | null;
-
 function Icon({ kind }: { kind: 'about' | 'projects' | 'stack' | 'dark' | 'web' | 'mail' | 'home' | 'contact' }) {
   switch (kind) {
     case 'about':
@@ -205,7 +201,8 @@ function App() {
   const [booting, setBooting] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [hackThemeActive, setHackThemeActive] = useState(false);
-  const [glitchTarget, setGlitchTarget] = useState<GlitchTarget>(null);
+  const [glitching, setGlitching] = useState(false);
+  const [glitchVariant, setGlitchVariant] = useState(0);
   const [heartsActive, setHeartsActive] = useState(false);
   const [heartsKey, setHeartsKey] = useState(0);
   const [terminalUnlocked, setTerminalUnlocked] = useState(false);
@@ -238,36 +235,43 @@ function App() {
 
   useEffect(() => {
     if (!hackThemeActive) {
-      setGlitchTarget(null);
+      setGlitching(false);
       return;
     }
 
     let cancelled = false;
-    let loopTimer: number | undefined;
-    let pulseTimer: number | undefined;
+    const timers = new Set<number>();
 
     const queuePulse = () => {
-      const wait = 1400 + Math.random() * 4200;
-      loopTimer = window.setTimeout(() => {
+      const wait = 240 + Math.random() * 720;
+      const loopTimer = window.setTimeout(() => {
         if (cancelled) return;
 
-        const nextTarget = glitchTargets[Math.floor(Math.random() * glitchTargets.length)];
-        setGlitchTarget(nextTarget);
+        setGlitchVariant((value) => (value + 1) % 3);
+        setGlitching(true);
 
-        pulseTimer = window.setTimeout(() => {
-          if (!cancelled) setGlitchTarget(null);
-        }, 220);
+        const pulseTimer = window.setTimeout(() => {
+          if (!cancelled) {
+            setGlitching(false);
+          }
+          timers.delete(pulseTimer);
+        }, 360 + Math.random() * 260);
+
+        timers.add(pulseTimer);
+        timers.delete(loopTimer);
 
         queuePulse();
       }, wait);
+
+      timers.add(loopTimer);
     };
 
     queuePulse();
 
     return () => {
       cancelled = true;
-      if (loopTimer) window.clearTimeout(loopTimer);
-      if (pulseTimer) window.clearTimeout(pulseTimer);
+      timers.forEach((timer) => window.clearTimeout(timer));
+      timers.clear();
     };
   }, [hackThemeActive]);
 
@@ -312,7 +316,7 @@ function App() {
   };
 
   return (
-    <div className={`page-shell${glitchTarget ? ` glitching glitch-${glitchTarget}` : ''}`}>
+    <div className={`page-shell${glitching ? ` glitching glitch-v${glitchVariant}` : ''}`}>
       <AnimatePresence>
         {booting && <BootSequence onComplete={() => setBooting(false)} />}
       </AnimatePresence>
@@ -376,7 +380,7 @@ function App() {
       </header>
 
       <main className="portfolio-main">
-        <section className="hero" id="hero" style={{ ['--hero-image' as string]: `url(${heroImage})` }}>
+        <section className={`hero${hackThemeActive ? ' hero--hack' : ''}`} id="hero" style={{ ['--hero-image' as string]: `url(${heroImage})` }}>
           <span className="hero__coord hero__coord--left">[X:0001.Y:0001]</span>
           <span className="hero__coord hero__coord--right">[X:0001.Y:0001]</span>
 
