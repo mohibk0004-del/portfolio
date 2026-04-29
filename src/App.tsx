@@ -1,10 +1,10 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { useEffect, useState, useRef, type FormEvent } from 'react';
+import { useEffect, useState, useRef, useMemo, useCallback, lazy, Suspense, type FormEvent } from 'react';
+import Lenis from 'lenis';
 import { BootSequence } from './components/BootSequence';
-import { AsciiCpuCanvas } from './components/AsciiCpuCanvas';
-import handsImage from './assets/hands.png';
-import handsDarkImage from './assets/hands_black.png';
-import handsHackImage from './assets/hands_hack.png';
+import handsImage from './assets/hands.webp';
+import handsDarkImage from './assets/hands_black.webp';
+import handsHackImage from './assets/hands_hack.webp';
 import {
   SiC,
   SiCplusplus,
@@ -38,6 +38,12 @@ import { TbBrandCSharp } from 'react-icons/tb';
 import { DiPhotoshop, DiIllustrator } from 'react-icons/di';
 import { FaAws } from 'react-icons/fa6';
 import { VscAzure } from 'react-icons/vsc';
+
+const AsciiCpuCanvas = lazy(() =>
+  import('./components/AsciiCpuCanvas').then((m) => ({ default: m.AsciiCpuCanvas }))
+);
+
+type ThemeKey = 'light' | 'dark' | 'hack' | 'decolumb' | 'gunmetal' | 'dubai';
 
 type ProjectLedger = {
   title: string;
@@ -76,7 +82,7 @@ const mappedIcon = (item: string) => {
     case 'bash': return <SiGnubash />;
     case 'html5': return <SiHtml5 />;
     case 'css3': return <SiCss />;
-    case 'react': 
+    case 'react':
     case 'react native': return <SiReact />;
     case 'next.js': return <SiNextdotjs />;
     case 'node.js': return <SiNodedotjs />;
@@ -134,7 +140,18 @@ const heartStream = Array.from({ length: 22 }, (_, index) => ({
   delay: `${(index % 7) * 0.55}s`,
 }));
 
-function Icon({ kind }: { kind: 'about' | 'projects' | 'stack' | 'dark' | 'web' | 'mail' | 'home' | 'contact' }) {
+const THEME_OPTIONS: { key: ThemeKey; label: string }[] = [
+  { key: 'light', label: 'LIGHT' },
+  { key: 'dark', label: 'DARK' },
+  { key: 'hack', label: 'HACK' },
+  { key: 'decolumb', label: 'DECOLUMB' },
+  { key: 'gunmetal', label: 'GUNMETAL' },
+  { key: 'dubai', label: 'DUBAI' },
+];
+
+const THEME_KEYS = new Set<ThemeKey>(THEME_OPTIONS.map((t) => t.key));
+
+function Icon({ kind }: { kind: 'about' | 'projects' | 'stack' | 'dark' | 'web' | 'mail' | 'home' | 'contact' | 'theme' | 'chevron' }) {
   switch (kind) {
     case 'about':
       return (
@@ -194,13 +211,29 @@ function Icon({ kind }: { kind: 'about' | 'projects' | 'stack' | 'dark' | 'web' 
           <path d="M4.5 14c.8-2.6 2.5-4 4.5-4s3.7 1.4 4.5 4" />
         </svg>
       );
+    case 'theme':
+      return (
+        <svg viewBox="0 0 18 18" aria-hidden="true">
+          <circle cx="9" cy="9" r="6.5" />
+          <path d="M9 2.5v13" />
+          <path d="M2.5 9c3 0 5-2 6.5-6.5 1.5 4.5 3.5 6.5 6.5 6.5-3 0-5 2-6.5 6.5-1.5-4.5-3.5-6.5-6.5-6.5Z" />
+        </svg>
+      );
+    case 'chevron':
+      return (
+        <svg viewBox="0 0 18 18" aria-hidden="true">
+          <path d="m4.5 7 4.5 4 4.5-4" />
+        </svg>
+      );
   }
 }
 
 function App() {
   const [booting, setBooting] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [hackThemeActive, setHackThemeActive] = useState(false);
+  const [theme, setTheme] = useState<ThemeKey>('light');
+  const [themesUnlocked, setThemesUnlocked] = useState(false);
+  const [themeMenuOpen, setThemeMenuOpen] = useState(false);
+  const [bitmapMode, setBitmapMode] = useState(false);
   const [glitching, setGlitching] = useState(false);
   const [glitchVariant, setGlitchVariant] = useState(0);
   const [heartsActive, setHeartsActive] = useState(false);
@@ -211,27 +244,88 @@ function App() {
   const [terminalCommand, setTerminalCommand] = useState('ACCESS PORTFOLIO');
   const [terminalMessage, setTerminalMessage] = useState('Type ACCESS PORTFOLIO and press Enter.');
   const terminalInputRef = useRef<HTMLInputElement>(null);
+  const themeMenuRef = useRef<HTMLDivElement>(null);
+
+  const hackThemeActive = theme === 'hack';
 
   useEffect(() => {
     if (booting) {
       document.body.style.overflow = 'hidden';
       return;
     }
-
     document.body.style.overflow = 'auto';
   }, [booting]);
 
   useEffect(() => {
-    const savedTheme = window.localStorage.getItem('portfolio-theme');
-    if (savedTheme === 'dark') {
-      setIsDarkMode(true);
+    if (booting) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) return;
+    const lenis = new Lenis({
+      duration: 0.95,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      wheelMultiplier: 1,
+      touchMultiplier: 1.6,
+    });
+    let rafId = 0;
+    const raf = (time: number) => {
+      lenis.raf(time);
+      rafId = requestAnimationFrame(raf);
+    };
+    rafId = requestAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(rafId);
+      lenis.destroy();
+    };
+  }, [booting]);
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem('portfolio-theme');
+    const unlocked = window.localStorage.getItem('portfolio-themes-unlocked') === '1';
+    if (unlocked) setThemesUnlocked(true);
+    if (saved && THEME_KEYS.has(saved as ThemeKey)) {
+      const t = saved as ThemeKey;
+      const isExtra = t !== 'light' && t !== 'dark';
+      if (isExtra && !unlocked) {
+        setTheme('light');
+      } else {
+        setTheme(t);
+      }
     }
   }, []);
 
   useEffect(() => {
-    document.documentElement.dataset.theme = hackThemeActive ? 'hack' : isDarkMode ? 'dark' : 'light';
-    window.localStorage.setItem('portfolio-theme', isDarkMode ? 'dark' : 'light');
-  }, [isDarkMode, hackThemeActive]);
+    document.documentElement.dataset.theme = theme;
+    window.localStorage.setItem('portfolio-theme', theme);
+  }, [theme]);
+
+  useEffect(() => {
+    document.documentElement.dataset.bitmap = bitmapMode ? '1' : '0';
+  }, [bitmapMode]);
+
+  useEffect(() => {
+    if (themesUnlocked) {
+      window.localStorage.setItem('portfolio-themes-unlocked', '1');
+    }
+  }, [themesUnlocked]);
+
+  useEffect(() => {
+    if (!themeMenuOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (themeMenuRef.current && !themeMenuRef.current.contains(e.target as Node)) {
+        setThemeMenuOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setThemeMenuOpen(false);
+    };
+    document.addEventListener('mousedown', onClick);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onClick);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [themeMenuOpen]);
 
   useEffect(() => {
     if (!hackThemeActive) {
@@ -275,15 +369,30 @@ function App() {
     };
   }, [hackThemeActive]);
 
-  const heroImage = hackThemeActive ? handsHackImage : isDarkMode ? handsDarkImage : handsImage;
+  const heroImage = useMemo(() => {
+    if (theme === 'hack') return handsHackImage;
+    if (theme === 'dark') return handsDarkImage;
+    return handsImage;
+  }, [theme]);
+
+  const toggleLightDark = useCallback(() => {
+    setTheme((cur) => (cur === 'dark' ? 'light' : 'dark'));
+  }, []);
+
+  const pickTheme = useCallback((next: ThemeKey) => {
+    setTheme(next);
+    setThemeMenuOpen(false);
+  }, []);
 
   const handleTerminalSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const normalized = terminalCommand.trim().toUpperCase();
+    const raw = terminalCommand.trim();
+    const normalized = raw.toUpperCase();
+
     if (normalized === 'ACCESS PORTFOLIO') {
       setTerminalUnlocked(true);
-      setTerminalMessage('Access granted. Type RENDER to reveal the ascii pipeline.');
+      setTerminalMessage('Access granted. Try RENDER, THEME, or BITMAP.');
       document.getElementById('stack')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       terminalInputRef.current?.focus();
       return;
@@ -298,9 +407,34 @@ function App() {
     }
 
     if (normalized === 'HACK') {
-      setHackThemeActive(true);
+      setTheme('hack');
       setTerminalUnlocked(true);
       setTerminalMessage('Mode switch complete.');
+      return;
+    }
+
+    if (normalized === 'THEME') {
+      setThemesUnlocked(true);
+      setThemeMenuOpen(true);
+      setTerminalMessage('Theme tab unlocked. Open /THEME on the top bar.');
+      return;
+    }
+
+    if (normalized.startsWith('THEME ')) {
+      const name = normalized.slice(6).trim().toLowerCase() as ThemeKey;
+      if (THEME_KEYS.has(name)) {
+        setThemesUnlocked(true);
+        setTheme(name);
+        setTerminalMessage(`Theme set: ${name.toUpperCase()}.`);
+      } else {
+        setTerminalMessage('Unknown theme. Try LIGHT, DARK, HACK, DECOLUMB, GUNMETAL, DUBAI.');
+      }
+      return;
+    }
+
+    if (normalized === 'BITMAP') {
+      setBitmapMode((v) => !v);
+      setTerminalMessage('Bitmap mode toggled.');
       return;
     }
 
@@ -315,13 +449,30 @@ function App() {
     terminalInputRef.current?.focus();
   };
 
+  const themeLabel = THEME_OPTIONS.find((t) => t.key === theme)?.label ?? 'LIGHT';
+
   return (
-    <div className={`page-shell${glitching ? ` glitching glitch-v${glitchVariant}` : ''}`}>
+    <div className={`page-shell${glitching ? ` glitching glitch-v${glitchVariant}` : ''}${bitmapMode ? ' bitmap-mode' : ''}`}>
       <AnimatePresence>
         {booting && <BootSequence onComplete={() => setBooting(false)} />}
       </AnimatePresence>
 
       <div className="page-noise" aria-hidden="true" />
+
+      {bitmapMode && (
+        <svg className="bitmap-defs" aria-hidden="true" focusable="false">
+          <defs>
+            <filter id="bitmap-filter" x="0" y="0" width="100%" height="100%">
+              <feColorMatrix type="saturate" values="0.55" />
+              <feComponentTransfer>
+                <feFuncR type="discrete" tableValues="0 0.33 0.66 1" />
+                <feFuncG type="discrete" tableValues="0 0.33 0.66 1" />
+                <feFuncB type="discrete" tableValues="0 0.33 0.66 1" />
+              </feComponentTransfer>
+            </filter>
+          </defs>
+        </svg>
+      )}
 
       {heartsActive && (
         <div className="amna-hearts" aria-hidden="true" key={heartsKey}>
@@ -358,10 +509,52 @@ function App() {
             <Icon kind="stack" />
             <span>/STACK</span>
           </a>
-          <button className="nav-link nav-link--button" type="button" onClick={() => setIsDarkMode((value) => !value)}>
+          <button className="nav-link nav-link--button" type="button" onClick={toggleLightDark}>
             <Icon kind="dark" />
-            <span>{isDarkMode ? '/LIGHTMODE' : '/DARKMODE'}</span>
+            <span>{theme === 'dark' ? '/LIGHTMODE' : '/DARKMODE'}</span>
           </button>
+          {themesUnlocked && (
+            <div className="theme-menu" ref={themeMenuRef}>
+              <button
+                className="nav-link nav-link--button"
+                type="button"
+                aria-haspopup="menu"
+                aria-expanded={themeMenuOpen}
+                onClick={() => setThemeMenuOpen((v) => !v)}
+              >
+                <Icon kind="theme" />
+                <span>/THEME</span>
+                <Icon kind="chevron" />
+              </button>
+              <AnimatePresence>
+                {themeMenuOpen && (
+                  <motion.ul
+                    role="menu"
+                    className="theme-menu__list"
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{ duration: 0.16, ease: [0.2, 0.8, 0.2, 1] }}
+                  >
+                    {THEME_OPTIONS.map((opt) => (
+                      <li key={opt.key} role="none">
+                        <button
+                          role="menuitemradio"
+                          aria-checked={theme === opt.key}
+                          className={`theme-menu__item${theme === opt.key ? ' theme-menu__item--active' : ''}`}
+                          type="button"
+                          onClick={() => pickTheme(opt.key)}
+                        >
+                          <span className={`theme-menu__swatch theme-menu__swatch--${opt.key}`} aria-hidden="true" />
+                          {opt.label}
+                        </button>
+                      </li>
+                    ))}
+                  </motion.ul>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
         </nav>
 
         <div className="topbar__socials" aria-label="Quick links">
@@ -376,6 +569,12 @@ function App() {
           <a className="mini-link" href="#contact" aria-label="Jump to contact section">
             <Icon kind="contact" />
           </a>
+          {themesUnlocked && (
+            <>
+              <span className="divider">|</span>
+              <span className="topbar__theme-tag" aria-live="polite">{themeLabel}</span>
+            </>
+          )}
         </div>
       </header>
 
@@ -421,7 +620,7 @@ function App() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
-            transition={{ duration: 0.52, ease: [0.2, 0.8, 0.2, 1] }}
+            transition={{ duration: 0.42, ease: [0.2, 0.8, 0.2, 1] }}
             className="content-grid"
             id="stack"
           >
@@ -479,7 +678,7 @@ function App() {
                       initial={{ opacity: 0, y: 8 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true, amount: 0.18 }}
-                      transition={{ duration: 0.44, ease: [0.2, 0.8, 0.2, 1], delay: index * 0.06 }}
+                      transition={{ duration: 0.42, ease: [0.2, 0.8, 0.2, 1], delay: index * 0.05 }}
                     >
                       <div className="ledger-row__index">[/&gt; {String(index + 1).padStart(2, '0')}]</div>
                       <div className="ledger-row__content">
@@ -509,7 +708,7 @@ function App() {
                 className="render-pipeline"
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.42, ease: [0.2, 0.8, 0.2, 1] }}
+                transition={{ duration: 0.4, ease: [0.2, 0.8, 0.2, 1] }}
               >
                 <div className="render-pipeline__frame">
                   <div className="render-pipeline__header">
@@ -517,7 +716,9 @@ function App() {
                     <span className="render-pipeline__hint">/ unlocks after render</span>
                   </div>
                   <div className="render-pipeline__canvas">
-                    <AsciiCpuCanvas />
+                    <Suspense fallback={<div className="render-pipeline__placeholder">Loading pipeline...</div>}>
+                      <AsciiCpuCanvas />
+                    </Suspense>
                   </div>
                 </div>
               </motion.section>
