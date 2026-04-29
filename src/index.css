@@ -398,6 +398,30 @@ button {
   color: color-mix(in srgb, var(--muted) 75%, transparent);
 }
 
+.terminal-box__actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 0.8rem 0.45rem;
+}
+
+.terminal-box__submit {
+  border: 1px solid var(--line);
+  background: var(--text);
+  color: var(--bg);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 0.42rem 0.82rem;
+  cursor: pointer;
+}
+
+.terminal-box__submit:hover,
+.terminal-box__submit:focus-visible {
+  opacity: 0.86;
+  outline: none;
+}
+
 .terminal-box__message {
   margin: 0;
   padding: 0 0.8rem 0.8rem;

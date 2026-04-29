@@ -302,7 +302,7 @@ function App() {
             <form className="terminal-box" onSubmit={handleTerminalSubmit}>
               <div className="terminal-box__bar">
                 <span>terminal://access</span>
-                <span>[ press enter ]</span>
+                <span>[ press enter / tap button ]</span>
               </div>
               <label className="terminal-box__prompt">
                 <span className="terminal-box__symbol">$</span>
@@ -316,6 +316,9 @@ function App() {
                   placeholder="ACCESS PORTFOLIO"
                 />
               </label>
+              <div className="terminal-box__actions">
+                <button type="submit" className="terminal-box__submit">ENTER</button>
+              </div>
               <p className="terminal-box__message">{terminalMessage}</p>
             </form>
           </div>
