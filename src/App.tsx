@@ -124,6 +124,15 @@ const projectLedger: ProjectLedger[] = [
     repo: 'https://github.com/mohibk0004-del/HamsterGame',
   },
 ];
+
+const heartStream = Array.from({ length: 22 }, (_, index) => ({
+  id: index,
+  left: `${4 + ((index * 97) % 92)}%`,
+  size: `${0.9 + (index % 4) * 0.22}rem`,
+  duration: `${5.2 + (index % 6) * 0.65}s`,
+  delay: `${(index % 7) * 0.55}s`,
+}));
+
 function Icon({ kind }: { kind: 'about' | 'projects' | 'stack' | 'dark' | 'web' | 'mail' | 'home' | 'contact' }) {
   switch (kind) {
     case 'about':
@@ -190,6 +199,9 @@ function Icon({ kind }: { kind: 'about' | 'projects' | 'stack' | 'dark' | 'web' 
 function App() {
   const [booting, setBooting] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [hackThemeActive, setHackThemeActive] = useState(false);
+  const [heartsActive, setHeartsActive] = useState(false);
+  const [heartsKey, setHeartsKey] = useState(0);
   const [terminalUnlocked, setTerminalUnlocked] = useState(false);
   const [renderPipelineVisible, setRenderPipelineVisible] = useState(false);
   const [selectedActive, setSelectedActive] = useState(true);
@@ -214,11 +226,11 @@ function App() {
   }, []);
 
   useEffect(() => {
-    document.documentElement.dataset.theme = isDarkMode ? 'dark' : 'light';
+    document.documentElement.dataset.theme = hackThemeActive ? 'hack' : isDarkMode ? 'dark' : 'light';
     window.localStorage.setItem('portfolio-theme', isDarkMode ? 'dark' : 'light');
-  }, [isDarkMode]);
+  }, [isDarkMode, hackThemeActive]);
 
-  const heroImage = isDarkMode ? handsDarkImage : handsImage;
+  const heroImage = hackThemeActive || isDarkMode ? handsDarkImage : handsImage;
 
   const handleTerminalSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -240,6 +252,20 @@ function App() {
       return;
     }
 
+    if (normalized === 'HACK') {
+      setHackThemeActive(true);
+      setTerminalUnlocked(true);
+      setTerminalMessage('Mode switch complete.');
+      return;
+    }
+
+    if (normalized === 'AMNA' || normalized === "AMNA'") {
+      setHeartsActive(true);
+      setHeartsKey((value) => value + 1);
+      setTerminalMessage('Signal received.');
+      return;
+    }
+
     setTerminalMessage('Command not recognized. Try ACCESS PORTFOLIO.');
     terminalInputRef.current?.focus();
   };
@@ -251,6 +277,25 @@ function App() {
       </AnimatePresence>
 
       <div className="page-noise" aria-hidden="true" />
+
+      {heartsActive && (
+        <div className="amna-hearts" aria-hidden="true" key={heartsKey}>
+          {heartStream.map((heart) => (
+            <span
+              key={heart.id}
+              className="amna-heart"
+              style={{
+                ['--heart-left' as string]: heart.left,
+                ['--heart-size' as string]: heart.size,
+                ['--heart-duration' as string]: heart.duration,
+                ['--heart-delay' as string]: heart.delay,
+              }}
+            >
+              ♥
+            </span>
+          ))}
+        </div>
+      )}
 
       <header className="topbar">
         <div className="topbar__brand">MOHIB KHAN</div>
