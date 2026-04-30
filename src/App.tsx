@@ -247,10 +247,24 @@ function App() {
   const [selectedActive, setSelectedActive] = useState(true);
   const [terminalCommand, setTerminalCommand] = useState('ACCESS PORTFOLIO');
   const [terminalMessage, setTerminalMessage] = useState('Type ACCESS PORTFOLIO and press Enter.');
+  const [nameGlitch, setNameGlitch] = useState(false);
   const terminalInputRef = useRef<HTMLInputElement>(null);
   const themeMenuRef = useRef<HTMLDivElement>(null);
 
   const hackThemeActive = theme === 'hack';
+
+  const hackDrag = useMemo(
+    () =>
+      hackThemeActive
+        ? {
+            drag: true as const,
+            dragMomentum: false,
+            dragElastic: 0.18,
+            whileDrag: { scale: 1.015, zIndex: 12 },
+          }
+        : {},
+    [hackThemeActive]
+  );
 
   useEffect(() => {
     if (booting) {
@@ -353,6 +367,36 @@ function App() {
 
     queuePulse();
 
+    return () => {
+      cancelled = true;
+      timers.forEach((timer) => window.clearTimeout(timer));
+      timers.clear();
+    };
+  }, [hackThemeActive]);
+
+  useEffect(() => {
+    if (!hackThemeActive) {
+      setNameGlitch(false);
+      return;
+    }
+    let cancelled = false;
+    const timers = new Set<number>();
+    const queue = () => {
+      const wait = 4800 + Math.random() * 2400;
+      const t = window.setTimeout(() => {
+        if (cancelled) return;
+        setNameGlitch(true);
+        const t2 = window.setTimeout(() => {
+          if (!cancelled) setNameGlitch(false);
+          timers.delete(t2);
+        }, 280 + Math.random() * 220);
+        timers.add(t2);
+        timers.delete(t);
+        queue();
+      }, wait);
+      timers.add(t);
+    };
+    queue();
     return () => {
       cancelled = true;
       timers.forEach((timer) => window.clearTimeout(timer));
@@ -581,9 +625,11 @@ function App() {
           <span className="hero__coord hero__coord--left">[X:0001.Y:0001]</span>
           <span className="hero__coord hero__coord--right">[X:0001.Y:0001]</span>
 
-          <div className="hero__copy">
+          <motion.div className={`hero__copy${hackThemeActive ? ' hack-draggable' : ''}`} {...hackDrag}>
             <p className="hero__eyebrow">Personal Document</p>
-            <h1 className="hero__title">MOHIB KHAN</h1>
+            <h1 className={`hero__title${nameGlitch ? ' hero__title--err404' : ''}`}>
+              {nameGlitch ? 'Error 404' : 'MOHIB KHAN'}
+            </h1>
             <p className="hero__subtitle">CS Student | AI &amp; Cybersecurity | Video Editor</p>
 
             <form className="terminal-box" onSubmit={handleTerminalSubmit}>
@@ -608,7 +654,7 @@ function App() {
               </div>
               <p className="terminal-box__message">{terminalMessage}</p>
             </form>
-          </div>
+          </motion.div>
         </section>
 
         <AnimatePresence>
@@ -619,8 +665,9 @@ function App() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.42, ease: [0.2, 0.8, 0.2, 1] }}
-            className="content-grid"
+            className={`content-grid${hackThemeActive ? ' hack-draggable' : ''}`}
             id="stack"
+            {...hackDrag}
           >
             <aside className="panel panel--left" id="about">
               <article className="status-report">
@@ -726,7 +773,11 @@ function App() {
         </AnimatePresence>
       </main>
 
-      <footer className="system-footer" id="contact">
+      <motion.footer
+        className={`system-footer${hackThemeActive ? ' hack-draggable' : ''}`}
+        id="contact"
+        {...hackDrag}
+      >
         <div className="system-footer__stats">
           <span>SYS_OS: V2.4.0-STABLE</span>
           <span>|</span>
@@ -740,7 +791,7 @@ function App() {
           <span>|</span>
           <span>UPTIME: 14D 03H</span>
         </div>
-      </footer>
+      </motion.footer>
     </div>
   );
 }

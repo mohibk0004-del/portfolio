@@ -492,6 +492,9 @@ button {
 
 :root[data-theme='hack'] .hero {
   background: transparent;
+  border-bottom: none;
+  -webkit-mask-image: linear-gradient(180deg, black 0%, black 70%, transparent 100%);
+  mask-image: linear-gradient(180deg, black 0%, black 70%, transparent 100%);
 }
 
 :root[data-theme='hack'] .hero::before {
@@ -501,7 +504,51 @@ button {
 :root[data-theme='hack'] .hero::after {
   background:
     linear-gradient(90deg, rgba(2, 6, 2, 0.62) 0%, rgba(2, 6, 2, 0.12) 26%, rgba(0, 255, 65, 0.04) 50%, rgba(2, 6, 2, 0.12) 74%, rgba(2, 6, 2, 0.62) 100%),
-    linear-gradient(180deg, transparent 0 14%, rgba(0, 255, 65, 0.04) 14% 86%, transparent 86% 100%);
+    linear-gradient(180deg, transparent 0 14%, rgba(0, 255, 65, 0.04) 14% 70%, transparent 100%);
+}
+
+:root[data-theme='hack'] .content-grid {
+  border-top: none;
+  background: transparent;
+}
+
+:root[data-theme='hack'] .panel--left {
+  border-right-color: transparent;
+}
+
+:root[data-theme='hack'] .projects-column {
+  border-left-color: transparent;
+}
+
+:root[data-theme='hack'] .system-footer {
+  border-top-color: rgba(0, 255, 65, 0.32);
+}
+
+.hack-draggable {
+  cursor: grab;
+  touch-action: none;
+}
+
+.hack-draggable:active {
+  cursor: grabbing;
+}
+
+.hero__title--err404 {
+  font-family: 'Press Start 2P', 'IBM Plex Mono', monospace !important;
+  font-size: clamp(1.4rem, 4.5vw + 0.4rem, 3.4rem) !important;
+  letter-spacing: 0.04em !important;
+  line-height: 1.15 !important;
+  color: #ff2d75 !important;
+  text-shadow: 2px 0 #00ff41, -2px 0 #00ffff, 0 0 12px rgba(255, 45, 117, 0.55) !important;
+  max-width: 100% !important;
+  animation: err404-flicker 220ms steps(3, end) infinite;
+}
+
+@keyframes err404-flicker {
+  0% { opacity: 1; transform: translate3d(0, 0, 0); }
+  35% { opacity: 0.78; transform: translate3d(-2px, 0, 0); }
+  60% { opacity: 1; transform: translate3d(2px, 0, 0); }
+  100% { opacity: 0.92; transform: translate3d(0, 0, 0); }
 }
 
 .hero {
