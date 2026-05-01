@@ -2,6 +2,12 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState, useRef, useMemo, useCallback, lazy, Suspense, type FormEvent } from 'react';
 import Lenis from 'lenis';
 import { BootSequence } from './components/BootSequence';
+import { SlideButton } from './components/ui/slide-button';
+import { TextHoverEffect, FooterBackgroundGradient } from './components/ui/hover-footer';
+import { TextScramble } from './components/ui/text-scramble';
+import { CircleMenu, type CircleMenuItem } from './components/ui/circle-menu';
+import { SiGithub } from 'react-icons/si';
+import { Mail, Globe, Sun, Moon, Palette } from 'lucide-react';
 import handsImage from './assets/hands.webp';
 import handsDarkImage from './assets/hands_black.webp';
 import handsHackImage from './assets/hands_hack.webp';
@@ -47,6 +53,10 @@ const MatrixRain = lazy(() =>
   import('./components/MatrixRain').then((m) => ({ default: m.MatrixRain }))
 );
 
+const DottedSurface = lazy(() =>
+  import('./components/ui/dotted-surface').then((m) => ({ default: m.DottedSurface }))
+);
+
 type ThemeKey = 'light' | 'dark' | 'hack' | 'decolumb' | 'gunmetal' | 'dubai' | 'luxury';
 
 type ProjectLedger = {
@@ -54,6 +64,7 @@ type ProjectLedger = {
   note: string;
   year: string;
   repo?: string;
+  inDev?: boolean;
 };
 
 const skillSets = [
@@ -120,6 +131,7 @@ const projectLedger: ProjectLedger[] = [
     note: 'A second-screen match companion with live sentiment, prediction loops, and branded match moments.',
     year: 'IN DEVELOPMENT',
     repo: 'https://github.com/amna0x/sideline',
+    inDev: true,
   },
   {
     title: 'Spotify Album Finder',
@@ -131,8 +143,9 @@ const projectLedger: ProjectLedger[] = [
   {
     title: '3D Platformer',
     note: 'A stylized game prototype focused on controls, playful pacing, and environmental readability.',
-    year: 'RELEASED',
+    year: 'IN DEVELOPMENT',
     repo: 'https://github.com/mohibk0004-del/HamsterGame',
+    inDev: true,
   },
 ];
 
@@ -485,7 +498,24 @@ function App() {
     terminalInputRef.current?.focus();
   };
 
-  const themeLabel = theme === 'hack' ? 'HACK' : THEME_OPTIONS.find((t) => t.key === theme)?.label ?? 'LIGHT';
+  const menuItems: CircleMenuItem[] = useMemo(() => {
+    const base: CircleMenuItem[] = [
+      { label: 'Home', icon: <Icon kind="home" />, href: '#hero' },
+      { label: 'About', icon: <Icon kind="about" />, href: '#about' },
+      { label: 'Projects', icon: <Icon kind="projects" />, href: '#projects' },
+      { label: 'Stack', icon: <Icon kind="stack" />, href: '#stack' },
+      { label: 'Contact', icon: <Icon kind="contact" />, href: '#contact' },
+      { label: 'Email', icon: <Mail size={16} />, href: 'mailto:mohibk0004@gmail.com' },
+    ];
+    if (themesUnlocked) {
+      base.push({
+        label: 'Themes',
+        icon: <Palette size={16} />,
+        onClick: () => setThemeMenuOpen((v) => !v),
+      });
+    }
+    return base;
+  }, [theme, themesUnlocked]);
 
   return (
     <div className={`page-shell${glitching ? ` glitching glitch-v${glitchVariant}` : ''}${bitmapMode ? ' bitmap-mode' : ''}`}>
@@ -498,6 +528,12 @@ function App() {
       {hackThemeActive && (
         <Suspense fallback={null}>
           <MatrixRain />
+        </Suspense>
+      )}
+
+      {!hackThemeActive && !booting && (
+        <Suspense fallback={null}>
+          <DottedSurface />
         </Suspense>
       )}
 
@@ -537,88 +573,53 @@ function App() {
 
       <header className="topbar">
         <div className="topbar__brand">MOHIB KHAN</div>
-
-        <nav className="topbar__nav" aria-label="Primary">
-          <a className="nav-link" href="#about">
-            <Icon kind="about" />
-            <span>/ABOUT</span>
-          </a>
-          <a className="nav-link" href="#projects">
-            <Icon kind="projects" />
-            <span>/PROJECTS</span>
-          </a>
-          <a className="nav-link" href="#stack">
-            <Icon kind="stack" />
-            <span>/STACK</span>
-          </a>
-          <button className="nav-link nav-link--button" type="button" onClick={toggleLightDark}>
-            <Icon kind="dark" />
-            <span>{theme === 'dark' ? '/LIGHTMODE' : '/DARKMODE'}</span>
-          </button>
-          {themesUnlocked && (
-            <div className="theme-menu" ref={themeMenuRef}>
-              <button
-                className="nav-link nav-link--button"
-                type="button"
-                aria-haspopup="menu"
-                aria-expanded={themeMenuOpen}
-                onClick={() => setThemeMenuOpen((v) => !v)}
-              >
-                <Icon kind="theme" />
-                <span>/THEME</span>
-                <Icon kind="chevron" />
-              </button>
-              <AnimatePresence>
-                {themeMenuOpen && (
-                  <motion.ul
-                    role="menu"
-                    className="theme-menu__list"
-                    initial={{ opacity: 0, y: -4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -4 }}
-                    transition={{ duration: 0.16, ease: [0.2, 0.8, 0.2, 1] }}
-                  >
-                    {THEME_OPTIONS.map((opt) => (
-                      <li key={opt.key} role="none">
-                        <button
-                          role="menuitemradio"
-                          aria-checked={theme === opt.key}
-                          className={`theme-menu__item${theme === opt.key ? ' theme-menu__item--active' : ''}`}
-                          type="button"
-                          onClick={() => pickTheme(opt.key)}
-                        >
-                          <span className={`theme-menu__swatch theme-menu__swatch--${opt.key}`} aria-hidden="true" />
-                          {opt.label}
-                        </button>
-                      </li>
-                    ))}
-                  </motion.ul>
-                )}
-              </AnimatePresence>
-            </div>
-          )}
-        </nav>
-
-        <div className="topbar__socials" aria-label="Quick links">
-          <a className="mini-link" href="#hero" aria-label="Back to top">
-            <Icon kind="web" />
-          </a>
-          <span className="divider">|</span>
-          <a className="mini-link" href="mailto:mohibk0004@gmail.com" aria-label="Email Mohib">
-            <Icon kind="mail" />
-          </a>
-          <span className="divider">|</span>
-          <a className="mini-link" href="#contact" aria-label="Jump to contact section">
-            <Icon kind="contact" />
-          </a>
-          {themesUnlocked && (
-            <>
-              <span className="divider">|</span>
-              <span className="topbar__theme-tag" aria-live="polite">{themeLabel}</span>
-            </>
-          )}
+        <div className="topbar__menu" aria-label="Primary navigation">
+          <CircleMenu items={menuItems} />
         </div>
+        <button
+          className="topbar__theme-btn"
+          onClick={toggleLightDark}
+          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          title={theme === 'dark' ? 'Light' : 'Dark'}
+        >
+          {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+        </button>
       </header>
+
+      {themesUnlocked && (
+        <div
+          className={`theme-menu theme-menu--floating${themeMenuOpen ? ' theme-menu--open' : ''}`}
+          ref={themeMenuRef}
+        >
+          <AnimatePresence>
+            {themeMenuOpen && (
+              <motion.ul
+                role="menu"
+                className="theme-menu__list"
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.16, ease: [0.2, 0.8, 0.2, 1] }}
+              >
+                {THEME_OPTIONS.map((opt) => (
+                  <li key={opt.key} role="none">
+                    <button
+                      role="menuitemradio"
+                      aria-checked={theme === opt.key}
+                      className={`theme-menu__item${theme === opt.key ? ' theme-menu__item--active' : ''}`}
+                      type="button"
+                      onClick={() => pickTheme(opt.key)}
+                    >
+                      <span className={`theme-menu__swatch theme-menu__swatch--${opt.key}`} aria-hidden="true" />
+                      {opt.label}
+                    </button>
+                  </li>
+                ))}
+              </motion.ul>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
 
       <main className="portfolio-main">
         <section className={`hero${hackThemeActive ? ' hero--hack' : ''}`} id="hero" style={{ ['--hero-image' as string]: `url(${heroImage})` }}>
@@ -626,11 +627,11 @@ function App() {
           <span className="hero__coord hero__coord--right">[X:0001.Y:0001]</span>
 
           <motion.div className={`hero__copy${hackThemeActive ? ' hack-draggable' : ''}`} {...hackDrag}>
-            <p className="hero__eyebrow">Personal Document</p>
+            <TextScramble as="p" className="hero__eyebrow">Personal Document</TextScramble>
             <h1 className={`hero__title${nameGlitch ? ' hero__title--err404' : ''}`}>
               {nameGlitch ? 'Error 404' : 'MOHIB KHAN'}
             </h1>
-            <p className="hero__subtitle">CS Student | AI &amp; Cybersecurity | Video Editor</p>
+            <TextScramble as="p" className="hero__subtitle">{'CS Student | AI & Cybersecurity | Video Editor'}</TextScramble>
 
             <form className="terminal-box" onSubmit={handleTerminalSubmit}>
               <div className="terminal-box__bar">
@@ -671,7 +672,7 @@ function App() {
           >
             <aside className="panel panel--left" id="about">
               <article className="status-report">
-                <span className="status-report__title">[ STATUS_REPORT ]</span>
+                <TextScramble as="span" className="status-report__title">{'[ STATUS_REPORT ]'}</TextScramble>
                 <p className="status-report__longform">
                   I&apos;m a Computer Science student with a strong passion for Artificial Intelligence,
                   Cybersecurity, and Game Development. When I&apos;m not writing code or building 3D environments,
@@ -680,11 +681,11 @@ function App() {
               </article>
 
             <section className="stack-matrix">
-              <h2 className="section-label">// TOOL_MATRIX</h2>
+              <TextScramble as="h2" className="section-label">// TOOL_MATRIX</TextScramble>
 
               {skillSets.map((group) => (
                 <article className="stack-group" key={group.label}>
-                  <h3>{group.label}</h3>
+                  <TextScramble as="h3">{group.label}</TextScramble>
                   <div className="chip-row">
                     {group.items.map((item) => (
                       <span className="chip" key={item}>
@@ -709,9 +710,9 @@ function App() {
                 }}
               >
                 <div className="selected-output__title">
-                  <em>Selected_Projects</em>
+                  <TextScramble as="em">Selected_Projects</TextScramble>
                 </div>
-                <div className="selected-output__drive">DRIVE:/PROJECTS/*</div>
+                <TextScramble as="div" className="selected-output__drive">DRIVE:/PROJECTS/*</TextScramble>
               </div>
 
               <section className="panel panel--right" id="projects">
@@ -727,18 +728,18 @@ function App() {
                     >
                       <div className="ledger-row__index">[/&gt; {String(index + 1).padStart(2, '0')}]</div>
                       <div className="ledger-row__content">
-                        <h4>{project.title}</h4>
-                        <p>{project.note}</p>
+                        <TextScramble as="h4">{project.title}</TextScramble>
+                        <TextScramble as="p" duration={1.2} speed={0.025}>{project.note}</TextScramble>
                         {project.repo && (
-                          <a
-                            className="visit-link"
+                          <SlideButton
                             href={project.repo}
-                            target="_blank"
-                            rel="noreferrer"
-                            aria-label={`Visit ${project.title} repository`}
-                          >
-                            VISIT &gt;
-                          </a>
+                            inDev={project.inDev}
+                            ariaLabel={
+                              project.inDev
+                                ? `${project.title} in development — repository private`
+                                : `Visit ${project.title} repository`
+                            }
+                          />
                         )}
                       </div>
                       <div className="ledger-row__year">{project.year}</div>
@@ -773,25 +774,101 @@ function App() {
         </AnimatePresence>
       </main>
 
-      <motion.footer
-        className={`system-footer${hackThemeActive ? ' hack-draggable' : ''}`}
-        id="contact"
-        {...hackDrag}
-      >
-        <div className="system-footer__stats">
-          <span>SYS_OS: V2.4.0-STABLE</span>
-          <span>|</span>
-          <span>CPU: 12%</span>
-          <span>|</span>
-          <span>RAM: 4.2GB/32GB</span>
-          <span>|</span>
-          <span>[READY]</span>
-          <span>|</span>
-          <span>NET_IO: 1.2MB/s</span>
-          <span>|</span>
-          <span>UPTIME: 14D 03H</span>
-        </div>
-      </motion.footer>
+      <AnimatePresence>
+      {terminalUnlocked && (
+        <motion.footer
+          key="hover-footer"
+          className={`hover-footer${hackThemeActive ? ' hack-draggable' : ''}`}
+          id="contact"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 8 }}
+          transition={{ duration: 0.42, ease: [0.2, 0.8, 0.2, 1] }}
+          {...hackDrag}
+        >
+          <div className="hover-footer__inner">
+            <div className="hover-footer__grid">
+              <div className="hover-footer__brand">
+                <div className="hover-footer__brand-row">
+                  <span className="hover-footer__heart">&hearts;</span>
+                  <TextScramble as="span" className="hover-footer__brand-name">MOHIB KHAN</TextScramble>
+                </div>
+                <p className="hover-footer__tagline">
+                  CS student building things in AI, cybersecurity, and game dev. Available for collaboration.
+                </p>
+              </div>
+
+              <div className="hover-footer__col">
+                <TextScramble as="h4">Navigate</TextScramble>
+                <ul>
+                  <li><a href="#hero">Top</a></li>
+                  <li><a href="#about">About</a></li>
+                  <li><a href="#projects">Projects</a></li>
+                  <li><a href="#stack">Stack</a></li>
+                </ul>
+              </div>
+
+              <div className="hover-footer__col">
+                <TextScramble as="h4">Connect</TextScramble>
+                <ul>
+                  <li>
+                    <a href="https://github.com/mohibk0004-del" target="_blank" rel="noreferrer">GitHub</a>
+                  </li>
+                  <li>
+                    <a href="mailto:mohibk0004@gmail.com">Email</a>
+                  </li>
+                  <li className="hover-footer__pulse-item">
+                    <a href="#projects">Open to work</a>
+                    <span className="hover-footer__pulse" aria-hidden="true" />
+                  </li>
+                </ul>
+              </div>
+
+              <div className="hover-footer__col">
+                <TextScramble as="h4">Contact</TextScramble>
+                <ul className="hover-footer__contact">
+                  <li>
+                    <Mail size={16} className="hover-footer__icon" />
+                    <a href="mailto:mohibk0004@gmail.com">mohibk0004@gmail.com</a>
+                  </li>
+                  <li>
+                    <Globe size={16} className="hover-footer__icon" />
+                    <span>Remote / GMT+5</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <hr className="hover-footer__rule" />
+
+            <div className="hover-footer__bottom">
+              <div className="hover-footer__socials">
+                <a
+                  href="https://github.com/mohibk0004-del"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="GitHub"
+                >
+                  <SiGithub size={18} />
+                </a>
+                <a href="mailto:mohibk0004@gmail.com" aria-label="Email">
+                  <Mail size={18} />
+                </a>
+              </div>
+              <p className="hover-footer__copy">
+                &copy; {new Date().getFullYear()} Mohib Khan. All rights reserved.
+              </p>
+            </div>
+          </div>
+
+          <div className="hover-footer__hover-text" aria-hidden="true">
+            <TextHoverEffect text="MOHIB" strokeColor="var(--text)" />
+          </div>
+
+          <FooterBackgroundGradient />
+        </motion.footer>
+      )}
+      </AnimatePresence>
     </div>
   );
 }
