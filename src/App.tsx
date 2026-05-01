@@ -5,7 +5,7 @@ import { BootSequence } from './components/BootSequence';
 import { SlideButton } from './components/ui/slide-button';
 import { TextHoverEffect, FooterBackgroundGradient } from './components/ui/hover-footer';
 import { TextScramble } from './components/ui/text-scramble';
-import { CircleMenu, type CircleMenuItem } from './components/ui/circle-menu';
+import { AnimatedNavigationTabs, type NavigationItem } from './components/ui/animated-navigation-tabs';
 import { SiGithub } from 'react-icons/si';
 import { Mail, Globe, Sun, Moon, Palette } from 'lucide-react';
 import handsImage from './assets/hands.webp';
@@ -498,24 +498,15 @@ function App() {
     terminalInputRef.current?.focus();
   };
 
-  const menuItems: CircleMenuItem[] = useMemo(() => {
-    const base: CircleMenuItem[] = [
-      { label: 'Home', icon: <Icon kind="home" />, href: '#hero' },
-      { label: 'About', icon: <Icon kind="about" />, href: '#about' },
-      { label: 'Projects', icon: <Icon kind="projects" />, href: '#projects' },
-      { label: 'Stack', icon: <Icon kind="stack" />, href: '#stack' },
-      { label: 'Contact', icon: <Icon kind="contact" />, href: '#contact' },
-      { label: 'Email', icon: <Mail size={16} />, href: 'mailto:mohibk0004@gmail.com' },
+  const navigationItems: NavigationItem[] = useMemo(() => {
+    return [
+      { id: 1, tile: 'Home', href: '#hero', onClick: () => window.location.hash = '#hero' },
+      { id: 2, tile: 'About', href: '#about', onClick: () => window.location.hash = '#about' },
+      { id: 3, tile: 'Projects', href: '#projects', onClick: () => window.location.hash = '#projects' },
+      { id: 4, tile: 'Stack', href: '#stack', onClick: () => window.location.hash = '#stack' },
+      { id: 5, tile: 'Contact', href: '#contact', onClick: () => window.location.hash = '#contact' },
     ];
-    if (themesUnlocked) {
-      base.push({
-        label: 'Themes',
-        icon: <Palette size={16} />,
-        onClick: () => setThemeMenuOpen((v) => !v),
-      });
-    }
-    return base;
-  }, [theme, themesUnlocked]);
+  }, []);
 
   return (
     <div className={`page-shell${glitching ? ` glitching glitch-v${glitchVariant}` : ''}${bitmapMode ? ' bitmap-mode' : ''}`}>
@@ -574,16 +565,8 @@ function App() {
       <header className="topbar">
         <div className="topbar__brand">MOHIB KHAN</div>
         <div className="topbar__menu" aria-label="Primary navigation">
-          <CircleMenu items={menuItems} />
+          <AnimatedNavigationTabs items={navigationItems} onThemeToggle={toggleLightDark} isDark={theme === 'dark'} />
         </div>
-        <button
-          className="topbar__theme-btn"
-          onClick={toggleLightDark}
-          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-          title={theme === 'dark' ? 'Light' : 'Dark'}
-        >
-          {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-        </button>
       </header>
 
       {themesUnlocked && (
