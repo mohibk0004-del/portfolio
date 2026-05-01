@@ -7,7 +7,7 @@ import { TextHoverEffect, FooterBackgroundGradient } from './components/ui/hover
 import { TextScramble } from './components/ui/text-scramble';
 import { AnimatedNavigationTabs, type NavigationItem } from './components/ui/animated-navigation-tabs';
 import { SiGithub } from 'react-icons/si';
-import { Mail, Globe, Sun, Moon, Palette } from 'lucide-react';
+import { Mail, Globe, Sun, Moon } from 'lucide-react';
 import handsImage from './assets/hands.webp';
 import handsDarkImage from './assets/hands_black.webp';
 import handsHackImage from './assets/hands_hack.webp';
@@ -168,83 +168,6 @@ const THEME_OPTIONS: { key: ThemeKey; label: string }[] = [
 
 const ALL_THEME_KEYS = new Set<ThemeKey>(['light', 'dark', 'hack', 'decolumb', 'gunmetal', 'dubai', 'luxury']);
 
-function Icon({ kind }: { kind: 'about' | 'projects' | 'stack' | 'dark' | 'web' | 'mail' | 'home' | 'contact' | 'theme' | 'chevron' }) {
-  switch (kind) {
-    case 'about':
-      return (
-        <svg viewBox="0 0 18 18" aria-hidden="true">
-          <rect x="2" y="2" width="5" height="5" />
-          <rect x="11" y="2" width="5" height="5" />
-          <rect x="2" y="11" width="5" height="5" />
-          <rect x="11" y="11" width="5" height="5" />
-        </svg>
-      );
-    case 'projects':
-      return (
-        <svg viewBox="0 0 18 18" aria-hidden="true">
-          <path d="M3 4.5h12M3 9h12M3 13.5h8" />
-          <path d="M12.5 12.5l2.5-2.5-2.5-2.5" />
-        </svg>
-      );
-    case 'stack':
-      return (
-        <svg viewBox="0 0 18 18" aria-hidden="true">
-          <path d="M3 4.5h12M3 9h12M3 13.5h12" />
-        </svg>
-      );
-    case 'dark':
-      return (
-        <svg viewBox="0 0 18 18" aria-hidden="true">
-          <path d="M9 2.5v13" />
-          <path d="M4 4.5h10" />
-          <path d="M4 13.5h10" />
-        </svg>
-      );
-    case 'web':
-      return (
-        <svg viewBox="0 0 18 18" aria-hidden="true">
-          <circle cx="9" cy="9" r="6.5" />
-          <path d="M2.5 9h13M9 2.5c2 2.1 3 4.3 3 6.5s-1 4.4-3 6.5c-2-2.1-3-4.3-3-6.5s1-4.4 3-6.5Z" />
-        </svg>
-      );
-    case 'mail':
-      return (
-        <svg viewBox="0 0 18 18" aria-hidden="true">
-          <rect x="2.5" y="4" width="13" height="10" rx="1" />
-          <path d="m3.5 5.5 5.5 4 5.5-4" />
-        </svg>
-      );
-    case 'home':
-      return (
-        <svg viewBox="0 0 18 18" aria-hidden="true">
-          <path d="M2.5 8.8 9 3l6.5 5.8" />
-          <path d="M4.5 7.8V15h9V7.8" />
-        </svg>
-      );
-    case 'contact':
-      return (
-        <svg viewBox="0 0 18 18" aria-hidden="true">
-          <circle cx="9" cy="6.2" r="2.2" />
-          <path d="M4.5 14c.8-2.6 2.5-4 4.5-4s3.7 1.4 4.5 4" />
-        </svg>
-      );
-    case 'theme':
-      return (
-        <svg viewBox="0 0 18 18" aria-hidden="true">
-          <circle cx="9" cy="9" r="6.5" />
-          <path d="M9 2.5v13" />
-          <path d="M2.5 9c3 0 5-2 6.5-6.5 1.5 4.5 3.5 6.5 6.5 6.5-3 0-5 2-6.5 6.5-1.5-4.5-3.5-6.5-6.5-6.5Z" />
-        </svg>
-      );
-    case 'chevron':
-      return (
-        <svg viewBox="0 0 18 18" aria-hidden="true">
-          <path d="m4.5 7 4.5 4 4.5-4" />
-        </svg>
-      );
-  }
-}
-
 function App() {
   const [booting, setBooting] = useState(true);
   const [theme, setTheme] = useState<ThemeKey>('light');
@@ -258,6 +181,7 @@ function App() {
   const [terminalUnlocked, setTerminalUnlocked] = useState(false);
   const [renderPipelineVisible, setRenderPipelineVisible] = useState(false);
   const [selectedActive, setSelectedActive] = useState(true);
+  const [projectTitleScrambleTick, setProjectTitleScrambleTick] = useState<Record<string, number>>({});
   const [terminalCommand, setTerminalCommand] = useState('ACCESS PORTFOLIO');
   const [terminalMessage, setTerminalMessage] = useState('Type ACCESS PORTFOLIO and press Enter.');
   const [nameGlitch, setNameGlitch] = useState(false);
@@ -508,6 +432,13 @@ function App() {
     ];
   }, []);
 
+  const bumpProjectTitleScramble = useCallback((title: string) => {
+    setProjectTitleScrambleTick((prev) => ({
+      ...prev,
+      [title]: (prev[title] ?? 0) + 1,
+    }));
+  }, []);
+
   return (
     <div className={`page-shell${glitching ? ` glitching glitch-v${glitchVariant}` : ''}${bitmapMode ? ' bitmap-mode' : ''}`}>
       <AnimatePresence>
@@ -565,44 +496,58 @@ function App() {
       <header className="topbar">
         <div className="topbar__brand">MOHIB KHAN</div>
         <div className="topbar__menu" aria-label="Primary navigation">
-          <AnimatedNavigationTabs items={navigationItems} onThemeToggle={toggleLightDark} isDark={theme === 'dark'} />
-        </div>
-      </header>
+          <AnimatedNavigationTabs
+            items={navigationItems}
+            themesUnlocked={themesUnlocked}
+            isThemesOpen={themeMenuOpen}
+            onThemesToggle={() => setThemeMenuOpen((v) => !v)}
+          />
 
-      {themesUnlocked && (
-        <div
-          className={`theme-menu theme-menu--floating${themeMenuOpen ? ' theme-menu--open' : ''}`}
-          ref={themeMenuRef}
-        >
-          <AnimatePresence>
-            {themeMenuOpen && (
-              <motion.ul
-                role="menu"
-                className="theme-menu__list"
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
-                transition={{ duration: 0.16, ease: [0.2, 0.8, 0.2, 1] }}
-              >
-                {THEME_OPTIONS.map((opt) => (
-                  <li key={opt.key} role="none">
-                    <button
-                      role="menuitemradio"
-                      aria-checked={theme === opt.key}
-                      className={`theme-menu__item${theme === opt.key ? ' theme-menu__item--active' : ''}`}
-                      type="button"
-                      onClick={() => pickTheme(opt.key)}
-                    >
-                      <span className={`theme-menu__swatch theme-menu__swatch--${opt.key}`} aria-hidden="true" />
-                      {opt.label}
-                    </button>
-                  </li>
-                ))}
-              </motion.ul>
-            )}
-          </AnimatePresence>
+          {themesUnlocked && (
+            <div
+              className={`theme-menu theme-menu--anchored${themeMenuOpen ? ' theme-menu--open' : ''}`}
+              ref={themeMenuRef}
+            >
+              <AnimatePresence>
+                {themeMenuOpen && (
+                  <motion.ul
+                    role="menu"
+                    className="theme-menu__list"
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{ duration: 0.16, ease: [0.2, 0.8, 0.2, 1] }}
+                  >
+                    {THEME_OPTIONS.map((opt) => (
+                      <li key={opt.key} role="none">
+                        <button
+                          role="menuitemradio"
+                          aria-checked={theme === opt.key}
+                          className={`theme-menu__item${theme === opt.key ? ' theme-menu__item--active' : ''}`}
+                          type="button"
+                          onClick={() => pickTheme(opt.key)}
+                        >
+                          <span className={`theme-menu__swatch theme-menu__swatch--${opt.key}`} aria-hidden="true" />
+                          {opt.label}
+                        </button>
+                      </li>
+                    ))}
+                  </motion.ul>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
         </div>
-      )}
+
+        <button
+          className="topbar__theme-btn"
+          onClick={toggleLightDark}
+          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          title={theme === 'dark' ? 'Light' : 'Dark'}
+        >
+          {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+        </button>
+      </header>
 
       <main className="portfolio-main">
         <section className={`hero${hackThemeActive ? ' hero--hack' : ''}`} id="hero" style={{ ['--hero-image' as string]: `url(${heroImage})` }}>
@@ -618,11 +563,15 @@ function App() {
 
             <form className="terminal-box" onSubmit={handleTerminalSubmit}>
               <div className="terminal-box__bar">
-                <span>terminal://access</span>
-                <span>[ press enter / tap button ]</span>
+                <span className="terminal-box__window-controls" aria-hidden="true">
+                  <i />
+                  <i />
+                  <i />
+                </span>
+                <span>root@mohib:~</span>
               </div>
               <label className="terminal-box__prompt">
-                <span className="terminal-box__symbol">$</span>
+                <span className="terminal-box__symbol">root@mohib:/$</span>
                 <input
                   ref={terminalInputRef}
                   value={terminalCommand}
@@ -630,11 +579,11 @@ function App() {
                   autoComplete="off"
                   spellCheck={false}
                   aria-label="Terminal command"
-                  placeholder="ACCESS PORTFOLIO"
+                  placeholder="access portfolio"
                 />
               </label>
               <div className="terminal-box__actions">
-                <button type="submit" className="terminal-box__submit">ENTER</button>
+                <button type="submit" className="terminal-box__submit">run</button>
               </div>
               <p className="terminal-box__message">{terminalMessage}</p>
             </form>
@@ -708,10 +657,21 @@ function App() {
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true, amount: 0.18 }}
                       transition={{ duration: 0.42, ease: [0.2, 0.8, 0.2, 1], delay: index * 0.05 }}
+                      onViewportEnter={() => bumpProjectTitleScramble(project.title)}
+                      onMouseEnter={() => bumpProjectTitleScramble(project.title)}
+                      onFocusCapture={() => bumpProjectTitleScramble(project.title)}
                     >
                       <div className="ledger-row__index">[/&gt; {String(index + 1).padStart(2, '0')}]</div>
                       <div className="ledger-row__content">
-                        <TextScramble as="h4">{project.title}</TextScramble>
+                        <TextScramble
+                          as="h4"
+                          duration={1.55}
+                          speed={0.03}
+                          trigger={(projectTitleScrambleTick[project.title] ?? 0) > 0}
+                          replayToken={projectTitleScrambleTick[project.title] ?? 0}
+                        >
+                          {project.title}
+                        </TextScramble>
                         <TextScramble as="p" duration={1.2} speed={0.025}>{project.note}</TextScramble>
                         {project.repo && (
                           <SlideButton

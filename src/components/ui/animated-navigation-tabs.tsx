@@ -1,7 +1,6 @@
-import { motion } from "framer-motion";
-import { useState } from "react";
+import { motion } from 'framer-motion';
+import { useState } from 'react';
 import { cn } from '../../lib/utils';
-import { Moon, Sun } from "lucide-react";
 
 export type NavigationItem = {
   id: number;
@@ -12,12 +11,14 @@ export type NavigationItem = {
 
 export function AnimatedNavigationTabs({
   items,
-  onThemeToggle,
-  isDark,
+  themesUnlocked,
+  isThemesOpen,
+  onThemesToggle,
 }: {
   items: NavigationItem[];
-  onThemeToggle: () => void;
-  isDark: boolean;
+  themesUnlocked: boolean;
+  isThemesOpen: boolean;
+  onThemesToggle: () => void;
 }) {
   const [active, setActive] = useState<NavigationItem>(items[0]);
   const [isHover, setIsHover] = useState<NavigationItem | null>(null);
@@ -37,8 +38,8 @@ export function AnimatedNavigationTabs({
             <motion.button
               key={item.id}
               className={cn(
-                "py-2 relative duration-300 transition-colors hover:!text-primary",
-                active.id === item.id ? "text-primary" : "text-muted-foreground"
+                'py-2 relative duration-300 transition-colors hover:text-foreground',
+                active.id === item.id ? 'text-foreground' : 'text-muted'
               )}
               onClick={() => handleItemClick(item)}
               onMouseEnter={() => setIsHover(item)}
@@ -51,7 +52,7 @@ export function AnimatedNavigationTabs({
                 {isHover?.id === item.id && (
                   <motion.div
                     layoutId="hover-bg"
-                    className="absolute bottom-0 left-0 right-0 w-full h-full bg-primary/10"
+                    className="absolute bottom-0 left-0 right-0 h-full w-full bg-[color-mix(in_srgb,var(--text)_10%,transparent)]"
                     style={{
                       borderRadius: 6,
                     }}
@@ -61,34 +62,41 @@ export function AnimatedNavigationTabs({
               {active.id === item.id && (
                 <motion.div
                   layoutId="active"
-                  className="absolute bottom-0 left-0 right-0 w-full h-0.5 bg-primary"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 w-full bg-foreground"
                 />
               )}
               {isHover?.id === item.id && (
                 <motion.div
                   layoutId="hover"
-                  className="absolute bottom-0 left-0 right-0 w-full h-0.5 bg-primary"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 w-full bg-foreground"
                 />
               )}
             </motion.button>
           ))}
+
+          {themesUnlocked && (
+            <motion.button
+              className={cn(
+                'py-2 relative duration-300 transition-colors hover:text-foreground',
+                isThemesOpen ? 'text-foreground' : 'text-muted'
+              )}
+              onClick={onThemesToggle}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              aria-label="Toggle themes menu"
+              aria-expanded={isThemesOpen}
+            >
+              <div className="px-5 py-2 relative">Themes</div>
+              {isThemesOpen && (
+                <motion.div
+                  layoutId="themes-active"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 w-full bg-foreground"
+                />
+              )}
+            </motion.button>
+          )}
         </ul>
       </div>
-
-      {/* Dark Mode Toggle */}
-      <motion.button
-        className="ml-4 p-2 rounded-full bg-muted hover:bg-muted/80 transition-colors"
-        onClick={onThemeToggle}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-        aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-      >
-        {isDark ? (
-          <Sun size={18} className="text-primary" />
-        ) : (
-          <Moon size={18} className="text-primary" />
-        )}
-      </motion.button>
     </div>
   );
 }

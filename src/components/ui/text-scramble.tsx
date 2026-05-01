@@ -9,6 +9,7 @@ type TextScrambleProps = {
   as?: ElementType;
   className?: string;
   trigger?: boolean;
+  replayToken?: number | string;
   onScrambleComplete?: () => void;
 } & MotionProps;
 
@@ -23,6 +24,7 @@ export function TextScramble({
   className,
   as: Component = 'p',
   trigger = true,
+  replayToken = 0,
   onScrambleComplete,
   ...props
 }: TextScrambleProps) {
@@ -78,7 +80,7 @@ export function TextScramble({
       }
       isAnimatingRef.current = false;
     };
-  }, [trigger, children, duration, speed, characterSet, onScrambleComplete]);
+  }, [trigger, replayToken, children, duration, speed, characterSet, onScrambleComplete]);
 
   return (
     <MotionComponent className={className} {...props}>
