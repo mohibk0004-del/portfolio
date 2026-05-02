@@ -5,12 +5,15 @@ import { BootSequence } from './components/BootSequence';
 import { SlideButton } from './components/ui/slide-button';
 import { TextHoverEffect, FooterBackgroundGradient } from './components/ui/hover-footer';
 import { TextScramble } from './components/ui/text-scramble';
+import { GooeyText } from './components/ui/gooey-text-morphing';
+import InteractiveCharacter from './components/ui/interactive-3d-character';
 import { AnimatedNavigationTabs, type NavigationItem } from './components/ui/animated-navigation-tabs';
 import { SiGithub } from 'react-icons/si';
 import { Mail, Globe, Sun, Moon } from 'lucide-react';
 import handsImage from './assets/hands.webp';
 import handsDarkImage from './assets/hands_black.webp';
 import handsHackImage from './assets/hands_hack.webp';
+import handsAmnaImage from './assets/hands_amna.png';
 import {
   SiC,
   SiCplusplus,
@@ -57,7 +60,20 @@ const DottedSurface = lazy(() =>
   import('./components/ui/dotted-surface').then((m) => ({ default: m.DottedSurface }))
 );
 
-type ThemeKey = 'light' | 'dark' | 'hack' | 'decolumb' | 'gunmetal' | 'dubai' | 'luxury';
+type ThemeKey =
+  | 'light'
+  | 'dark'
+  | 'hack'
+  | 'decolumb'
+  | 'gunmetal'
+  | 'dubai'
+  | 'luxury'
+  | 'power'
+  | 'forest'
+  | 'matcha'
+  | 'amna'
+  | 'halftone';
+
 
 type ProjectLedger = {
   title: string;
@@ -160,13 +176,30 @@ const heartStream = Array.from({ length: 22 }, (_, index) => ({
 const THEME_OPTIONS: { key: ThemeKey; label: string }[] = [
   { key: 'light', label: 'LIGHT' },
   { key: 'dark', label: 'DARK' },
+  { key: 'power', label: 'POWER' },
+  { key: 'forest', label: 'FOREST_MINT' },
+  { key: 'matcha', label: 'TOKYO_MATCHA' },
+  { key: 'halftone', label: 'HALFTONE' },
   { key: 'decolumb', label: 'DECOLUMB' },
   { key: 'gunmetal', label: 'GUNMETAL' },
   { key: 'dubai', label: 'DUBAI' },
   { key: 'luxury', label: 'LUXURY' },
 ];
 
-const ALL_THEME_KEYS = new Set<ThemeKey>(['light', 'dark', 'hack', 'decolumb', 'gunmetal', 'dubai', 'luxury']);
+const ALL_THEME_KEYS = new Set<ThemeKey>([
+  'light',
+  'dark',
+  'hack',
+  'decolumb',
+  'gunmetal',
+  'dubai',
+  'luxury',
+  'power',
+  'forest',
+  'matcha',
+  'amna',
+  'halftone',
+]);
 
 function App() {
   const [booting, setBooting] = useState(true);
@@ -189,6 +222,24 @@ function App() {
   const themeMenuRef = useRef<HTMLDivElement>(null);
 
   const hackThemeActive = theme === 'hack';
+  const amnaThemeActive = theme === 'amna';
+  const showDottedSurface = !hackThemeActive && !booting;
+
+  const heroMorphTexts = useMemo(() => {
+    if (hackThemeActive && nameGlitch) {
+      return ['ERROR 404', 'SYSTEM BREACH', 'MOHIB KHAN'];
+    }
+
+    if (amnaThemeActive) {
+      return ['I love you', 'my amnasso', 'i mih you'];
+    }
+
+    if (theme === 'matcha') {
+      return ['MOHIB KHAN', 'CS STUDENT', 'AI + CYBERSECURITY', 'GAME DEVELOPMENT'];
+    }
+
+    return ['MOHIB KHAN', 'CS STUDENT', 'AI + CYBERSECURITY', 'GAME DEVELOPMENT', 'VIDEO EDITOR'];
+  }, [amnaThemeActive, hackThemeActive, nameGlitch, theme]);
 
   const hackDrag = useMemo(
     () =>
@@ -244,6 +295,12 @@ function App() {
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     window.localStorage.setItem('portfolio-theme', theme);
+  }, [theme]);
+
+  useEffect(() => {
+    if (theme !== 'amna') {
+      setHeartsActive(false);
+    }
   }, [theme]);
 
   useEffect(() => {
@@ -342,6 +399,7 @@ function App() {
   }, [hackThemeActive]);
 
   const heroImage = useMemo(() => {
+    if (theme === 'amna') return handsAmnaImage;
     if (theme === 'hack') return handsHackImage;
     if (theme === 'dark') return handsDarkImage;
     return handsImage;
@@ -396,11 +454,15 @@ function App() {
       const after = normalized.startsWith('THEMES ') ? normalized.slice(7) : normalized.slice(6);
       const name = after.trim().toLowerCase() as ThemeKey;
       if (ALL_THEME_KEYS.has(name)) {
+        if (name === 'amna') {
+          setTerminalMessage('Use AMNA to enter love mode.');
+          return;
+        }
         if (name !== 'hack') setThemesUnlocked(true);
         setTheme(name);
         setTerminalMessage(`Theme set: ${name.toUpperCase()}.`);
       } else {
-        setTerminalMessage('Unknown theme. Try LIGHT, DARK, DECOLUMB, GUNMETAL, DUBAI, LUXURY.');
+        setTerminalMessage('Unknown theme. Try LIGHT, DARK, POWER, FOREST, MATCHA, DECOLUMB, GUNMETAL, DUBAI, LUXURY.');
       }
       return;
     }
@@ -412,9 +474,11 @@ function App() {
     }
 
     if (normalized === 'AMNA' || normalized === "AMNA'") {
+      setTheme('amna');
+      setTerminalUnlocked(true);
       setHeartsActive(true);
       setHeartsKey((value) => value + 1);
-      setTerminalMessage('Signal received.');
+      setTerminalMessage('AMNA mode engaged. Love stream online.');
       return;
     }
 
@@ -453,7 +517,7 @@ function App() {
         </Suspense>
       )}
 
-      {!hackThemeActive && !booting && (
+      {showDottedSurface && (
         <Suspense fallback={null}>
           <DottedSurface />
         </Suspense>
@@ -550,16 +614,25 @@ function App() {
       </header>
 
       <main className="portfolio-main">
-        <section className={`hero${hackThemeActive ? ' hero--hack' : ''}`} id="hero" style={{ ['--hero-image' as string]: `url(${heroImage})` }}>
+        <section className={`hero${hackThemeActive ? ' hero--hack' : ''}${amnaThemeActive ? ' hero--amna' : ''}`} id="hero" style={{ ['--hero-image' as string]: `url(${heroImage})` }}>
+          {theme === 'matcha' && (
+            <>
+              <div className="hero__jp-left" aria-hidden="true">モヒブ・カーン</div>
+              <div className="hero__jp-right" aria-hidden="true">マッチャ</div>
+            </>
+          )}
           <span className="hero__coord hero__coord--left">[X:0001.Y:0001]</span>
           <span className="hero__coord hero__coord--right">[X:0001.Y:0001]</span>
 
           <motion.div className={`hero__copy${hackThemeActive ? ' hack-draggable' : ''}`} {...hackDrag}>
             <TextScramble as="p" className="hero__eyebrow">Personal Document</TextScramble>
-            <h1 className={`hero__title${nameGlitch ? ' hero__title--err404' : ''}`}>
-              {nameGlitch ? 'Error 404' : 'MOHIB KHAN'}
-            </h1>
-            <TextScramble as="p" className="hero__subtitle">{'CS Student | AI & Cybersecurity | Video Editor'}</TextScramble>
+            <GooeyText
+              texts={heroMorphTexts}
+              morphTime={0.8}
+              cooldownTime={amnaThemeActive ? 5 : 7}
+              className="hero__gooey"
+              textClassName="hero__gooey-text"
+            />
 
             <form className="terminal-box" onSubmit={handleTerminalSubmit}>
               <div className="terminal-box__bar">
@@ -591,17 +664,17 @@ function App() {
         </section>
 
         <AnimatePresence>
-        {terminalUnlocked && (
-          <motion.section
-            key="content-grid"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 8 }}
-            transition={{ duration: 0.42, ease: [0.2, 0.8, 0.2, 1] }}
-            className={`content-grid${hackThemeActive ? ' hack-draggable' : ''}`}
-            id="stack"
-            {...hackDrag}
-          >
+          {!amnaThemeActive && terminalUnlocked && (
+            <motion.section
+              key="content-grid"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 8 }}
+              transition={{ duration: 0.42, ease: [0.2, 0.8, 0.2, 1] }}
+              className={`content-grid${hackThemeActive ? ' hack-draggable' : ''}`}
+              id="stack"
+              {...hackDrag}
+            >
             <aside className="panel panel--left" id="about">
               <article className="status-report">
                 <TextScramble as="span" className="status-report__title">{'[ STATUS_REPORT ]'}</TextScramble>
@@ -692,7 +765,7 @@ function App() {
               </section>
             </div>
 
-            {renderPipelineVisible && (
+            {renderPipelineVisible && !amnaThemeActive && (
               <motion.section
                 className="render-pipeline"
                 initial={{ opacity: 0, y: 12 }}
@@ -718,7 +791,7 @@ function App() {
       </main>
 
       <AnimatePresence>
-      {terminalUnlocked && (
+      {!amnaThemeActive && terminalUnlocked && (
         <motion.footer
           key="hover-footer"
           className={`hover-footer${hackThemeActive ? ' hack-draggable' : ''}`}
@@ -812,6 +885,12 @@ function App() {
         </motion.footer>
       )}
       </AnimatePresence>
+
+      {amnaThemeActive && (
+        <div className="amna-character-wrap" style={{ width: '100%', display: 'flex', justifyContent: 'center', padding: '2rem 0' }}>
+          <InteractiveCharacter />
+        </div>
+      )}
     </div>
   );
 }
