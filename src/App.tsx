@@ -13,7 +13,7 @@ import { Mail, Globe, Sun, Moon } from 'lucide-react';
 import handsImage from './assets/hands.webp';
 import handsDarkImage from './assets/hands_black.webp';
 import handsHackImage from './assets/hands_hack.webp';
-import handsAmnaImage from './assets/hands_amna.png';
+import handsAmnaImage from './assets/hands_amna.webp';
 import {
   SiC,
   SiCplusplus,
