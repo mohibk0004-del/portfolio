@@ -61,7 +61,7 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
     <motion.div
       initial={{ opacity: 1 }}
       exit={{ opacity: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } }}
-      className="fixed inset-0 z-[100] bg-surface text-surface-tint font-code-sm text-code-sm p-4 overflow-hidden flex flex-col justify-end"
+      className="boot-screen fixed inset-0 z-[100] font-code-sm text-code-sm p-4 overflow-hidden flex flex-col justify-end"
     >
       <AnimatePresence mode="wait">
         {!showHello ? (

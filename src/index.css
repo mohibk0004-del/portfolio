@@ -398,6 +398,13 @@ button {
   opacity: 0.38;
 }
 
+.boot-screen {
+  background:
+    radial-gradient(circle at 18% 18%, var(--hero-glow-soft), transparent 30%),
+    var(--bg);
+  color: var(--muted);
+}
+
 .boot-hello {
   display: inline-flex;
   align-items: center;
