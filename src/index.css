@@ -2,9 +2,9 @@
 @config "../tailwind.config.js";
 
 :root {
-  --bg: #FFFFE3;
-  --bg-soft: #f9f6dd;
-  --bg-rgb: 255, 255, 227;
+  --bg: #ffffff;
+  --bg-soft: #f6f6f6;
+  --bg-rgb: 255, 255, 255;
   --surface: rgba(255, 255, 255, 0.72);
   --surface-solid: #faf8f2;
   --text: #111111;
@@ -3146,4 +3146,27 @@ button {
     grid-column: 2;
     grid-row: 1;
   }
+}
+
+/* Ivory theme */
+:root[data-theme='ivory'] {
+  --bg: #FFFFE3;
+  --bg-soft: #f9f6dd;
+  --bg-rgb: 255, 255, 227;
+  --surface: rgba(255, 255, 255, 0.72);
+  --surface-solid: #faf8f2;
+  --text: #111111;
+  --muted: #4c4944;
+  --line: rgba(17, 17, 17, 0.86);
+  --line-soft: rgba(17, 17, 17, 0.58);
+  --shadow: rgba(17, 17, 17, 0.18);
+  color-scheme: light;
+  --hero-eyebrow: #4c4944;
+  --hero-title: #111111;
+  --hero-subtitle: #4c4944;
+  --love-heart: #ff2d55;
+  --matrix-active: var(--hero-title);
+  --matrix-glow: color-mix(in srgb, var(--hero-title) 54%, transparent);
+  --wave-bg: var(--bg);
+  --wave-stroke: color-mix(in srgb, var(--text) 34%, transparent);
 }

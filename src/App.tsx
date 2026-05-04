@@ -76,6 +76,7 @@ const HERO_PHRASES = ['MOHIB KHAN', 'CS STUDENT', 'AI + WEB DEV', 'GAME DEVELOPE
 type ThemeKey =
   | 'light'
   | 'dark'
+  | 'ivory'
   | 'amoled'
   | 'hack'
   | 'decolumb'
@@ -311,6 +312,7 @@ const heartStream = Array.from({ length: 22 }, (_, index) => ({
 
 const THEME_OPTIONS: { key: ThemeKey; label: string }[] = [
   { key: 'light', label: 'LIGHT' },
+  { key: 'ivory', label: 'IVORY' },
   { key: 'dark', label: 'DARK' },
   { key: 'amoled', label: 'AMOLED' },
   { key: 'power', label: 'POWER' },
@@ -325,6 +327,7 @@ const THEME_OPTIONS: { key: ThemeKey; label: string }[] = [
 
 const ALL_THEME_KEYS = new Set<ThemeKey>([
   'light',
+  'ivory',
   'dark',
   'amoled',
   'hack',
@@ -342,7 +345,7 @@ const ALL_THEME_KEYS = new Set<ThemeKey>([
 function App() {
   const [booting, setBooting] = useState(true);
   const [theme, setTheme] = useState<ThemeKey>('light');
-  const [themesUnlocked, setThemesUnlocked] = useState(false);
+  const [themesUnlocked] = useState(true);
   const [themeMenuOpen, setThemeMenuOpen] = useState(false);
   const [bitmapMode, setBitmapMode] = useState(false);
   const [glitching, setGlitching] = useState(false);
@@ -415,14 +418,23 @@ function App() {
   }, [booting]);
 
   useEffect(() => {
-    // Always start in light mode on page load (do not read persisted theme)
-    document.documentElement.dataset.theme = 'light';
-    // Keep runtime theme sync without persisting to localStorage so refresh reverts to light
+    // Read persisted theme from localStorage if available, otherwise default to light
+    const saved = window.localStorage.getItem('portfolio-theme');
+    if (saved && ALL_THEME_KEYS.has(saved as ThemeKey)) {
+      setTheme(saved as ThemeKey);
+    } else {
+      setTheme('light');
+    }
   }, []);
 
   useEffect(() => {
-    // Apply theme for current session but do not persist between page loads
+    // Apply theme for current session and persist to localStorage
     document.documentElement.dataset.theme = theme;
+    try {
+      window.localStorage.setItem('portfolio-theme', theme);
+    } catch (e) {
+      // ignore quota errors
+    }
   }, [theme]);
 
   useEffect(() => {
@@ -565,29 +577,7 @@ function App() {
       return;
     }
 
-    if (normalized === 'THEME' || normalized === 'THEMES') {
-      setThemesUnlocked(true);
-      setThemeMenuOpen(true);
-      setTerminalMessage('THEME TAB UNLOCKED. OPEN /THEME ON THE TOP BAR.');
-      return;
-    }
-
-    if (normalized.startsWith('THEME ') || normalized.startsWith('THEMES ')) {
-      const after = normalized.startsWith('THEMES ') ? normalized.slice(7) : normalized.slice(6);
-      const name = after.trim().toLowerCase() as ThemeKey;
-      if (ALL_THEME_KEYS.has(name)) {
-        if (name === 'amna') {
-          setTerminalMessage('USE AMNA TO ENTER LOVE MODE.');
-          return;
-        }
-        if (name !== 'hack') setThemesUnlocked(true);
-        setTheme(name);
-        setTerminalMessage(`THEME SET: ${name.toUpperCase()}.`);
-      } else {
-        setTerminalMessage('UNKNOWN THEME. TRY LIGHT, DARK, AMOLED, POWER, FOREST, MATCHA, DECOLUMB, GUNMETAL, DUBAI, LUXURY.');
-      }
-      return;
-    }
+    // Theme commands removed: themes are available by default in the UI.
 
     if (normalized === 'BITMAP') {
       setBitmapMode((v) => !v);
