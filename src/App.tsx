@@ -415,15 +415,14 @@ function App() {
   }, [booting]);
 
   useEffect(() => {
-    const saved = window.localStorage.getItem('portfolio-theme');
-    if (saved && ALL_THEME_KEYS.has(saved as ThemeKey)) {
-      setTheme(saved as ThemeKey);
-    }
+    // Always start in light mode on page load (do not read persisted theme)
+    document.documentElement.dataset.theme = 'light';
+    // Keep runtime theme sync without persisting to localStorage so refresh reverts to light
   }, []);
 
   useEffect(() => {
+    // Apply theme for current session but do not persist between page loads
     document.documentElement.dataset.theme = theme;
-    window.localStorage.setItem('portfolio-theme', theme);
   }, [theme]);
 
   useEffect(() => {

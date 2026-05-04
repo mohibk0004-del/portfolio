@@ -2,9 +2,9 @@
 @config "../tailwind.config.js";
 
 :root {
-  --bg: #f6f4ee;
-  --bg-soft: #efebe2;
-  --bg-rgb: 246, 244, 238;
+  --bg: #FFFFE4;
+  --bg-soft: #f9f6de;
+  --bg-rgb: 255, 255, 228;
   --surface: rgba(255, 255, 255, 0.72);
   --surface-solid: #faf8f2;
   --text: #111111;
