@@ -2,9 +2,9 @@
 @config "../tailwind.config.js";
 
 :root {
-  --bg: #FFFFE4;
-  --bg-soft: #f9f6de;
-  --bg-rgb: 255, 255, 228;
+  --bg: #FFFFE3;
+  --bg-soft: #f9f6dd;
+  --bg-rgb: 255, 255, 227;
   --surface: rgba(255, 255, 255, 0.72);
   --surface-solid: #faf8f2;
   --text: #111111;
@@ -911,7 +911,7 @@ button {
   background-size: cover;
   opacity: 0.42;
   filter: grayscale(1) contrast(1.05);
-  transform: scale(1.02);
+  transform: scale(0.92);
   pointer-events: none;
 }
 
