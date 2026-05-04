@@ -575,35 +575,45 @@ function App() {
 
   const [activeNavId, setActiveNavId] = useState<number>(1);
 
-  // observe page sections and update active nav on scroll
+  // Track the section closest to the top of the viewport.
   useEffect(() => {
-    const idMap = new Map<string, number>();
-    navigationItems.forEach((it) => {
-      if (it.href) idMap.set(it.href.replace('#', ''), it.id);
-    });
+    let rafId = 0;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const id = entry.target.getAttribute('id');
-            if (id && idMap.has(id)) {
-              setActiveNavId(idMap.get(id)!);
-            }
-          }
-        });
-      },
-      { root: null, rootMargin: '0px', threshold: 0.5 }
-    );
+    const updateActiveSection = () => {
+      const probeY = window.scrollY + 110;
+      let nextId = navigationItems[0]?.id ?? 1;
+      let closestTop = Number.NEGATIVE_INFINITY;
 
-    navigationItems.forEach((it) => {
-      if (!it.href) return;
-      const el = document.getElementById(it.href.replace('#', ''));
-      if (el) observer.observe(el);
-    });
+      navigationItems.forEach((item) => {
+        if (!item.href) return;
+        const el = document.getElementById(item.href.replace('#', ''));
+        if (!el) return;
 
-    return () => observer.disconnect();
-  }, [navigationItems]);
+        const top = el.getBoundingClientRect().top + window.scrollY;
+        if (top <= probeY && top > closestTop) {
+          closestTop = top;
+          nextId = item.id;
+        }
+      });
+
+      setActiveNavId(nextId);
+    };
+
+    const requestUpdate = () => {
+      window.cancelAnimationFrame(rafId);
+      rafId = window.requestAnimationFrame(updateActiveSection);
+    };
+
+    requestUpdate();
+    window.addEventListener('scroll', requestUpdate, { passive: true });
+    window.addEventListener('resize', requestUpdate);
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      window.removeEventListener('scroll', requestUpdate);
+      window.removeEventListener('resize', requestUpdate);
+    };
+  }, [navigationItems, terminalUnlocked]);
 
   const bumpProjectTitleScramble = useCallback((title: string) => {
     setProjectTitleScrambleTick((prev) => ({
@@ -691,7 +701,12 @@ function App() {
         </div>
       )}
 
-      <header className="topbar">
+      <motion.header
+        className="topbar"
+        initial={{ opacity: 0, y: -18 }}
+        animate={booting ? { opacity: 0, y: -18 } : { opacity: 1, y: 0 }}
+        transition={{ duration: 0.52, ease: [0.22, 1, 0.36, 1] }}
+      >
         <MacOSMenuBar
           name="MOHIB KHAN"
           items={navigationItems.map((item) => ({ id: item.id, label: item.tile, onClick: item.onClick }))}
@@ -719,7 +734,7 @@ function App() {
             </>
           }
         />
-      </header>
+      </motion.header>
 
       <main className="portfolio-main">
         <section className={`hero${hackThemeActive ? ' hero--hack' : ''}${amnaThemeActive ? ' hero--amna' : ''}`} id="hero" style={{ ['--hero-image' as string]: `url(${heroImage})` }}>
