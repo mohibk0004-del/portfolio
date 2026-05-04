@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useInView } from "framer-motion";
 
-const CHARS = "!@#$%^&*()_+-=[]{}|;:',.<>?/`~";
+const BINARY_CHARS = "01";
 
 export function useDecodedText(text: string, duration: number = 800) {
   const [displayText, setDisplayText] = useState("");
@@ -11,7 +11,7 @@ export function useDecodedText(text: string, duration: number = 800) {
 
   useEffect(() => {
     if (!isInView) {
-      setDisplayText(text.replace(/./g, () => CHARS[Math.floor(Math.random() * CHARS.length)]));
+      setDisplayText(text.replace(/./g, () => BINARY_CHARS[Math.floor(Math.random() * BINARY_CHARS.length)]));
       hasAnimated.current = false;
       return;
     }
@@ -40,7 +40,7 @@ export function useDecodedText(text: string, duration: number = 800) {
           if (progress > settleThreshold) {
             return char;
           }
-          return CHARS[Math.floor(Math.random() * CHARS.length)];
+          return BINARY_CHARS[Math.floor(Math.random() * BINARY_CHARS.length)];
         }).join("")
       );
 

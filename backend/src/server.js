@@ -1,13 +1,57 @@
 import 'dotenv/config';
 import cors from 'cors';
 import express from 'express';
+import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
 
 const app = express();
 const port = Number(process.env.PORT || 8080);
 const frontendOrigin = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
 
+// Security middleware
+app.use(helmet());
 app.use(cors({ origin: frontendOrigin }));
-app.use(express.json());
+
+// Rate limiting middleware
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 requests per windowMs for auth routes
+  message: 'Too many auth attempts, please try again later.',
+  skip: (req) => req.method !== 'POST', // Only limit POST requests
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Apply general rate limiting to all routes
+app.use(generalLimiter);
+
+// Request validation and sanitization
+const validateAndSanitize = (req, res, next) => {
+  // Check payload size
+  const maxPayloadSize = 1024 * 100; // 100KB max
+  let dataSize = 0;
+
+  req.on('data', (chunk) => {
+    dataSize += chunk.length;
+    if (dataSize > maxPayloadSize) {
+      res.status(413).json({ ok: false, error: 'Payload too large' });
+      req.destroy();
+    }
+  });
+
+  next();
+};
+
+app.use(express.json({ limit: '100kb' }));
+app.use(validateAndSanitize);
 
 const projects = [
   {
@@ -42,6 +86,17 @@ app.get('/api/health', (_req, res) => {
 
 app.get('/api/projects', (_req, res) => {
   res.json({ ok: true, projects });
+});
+
+// 404 handler
+app.use((_req, res) => {
+  res.status(404).json({ ok: false, error: 'Not found' });
+});
+
+// Error handler
+app.use((err, _req, res, _next) => {
+  console.error('Server error:', err);
+  res.status(500).json({ ok: false, error: 'Internal server error' });
 });
 
 app.listen(port, () => {

@@ -1,5 +1,5 @@
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
 import { cn } from '../../lib/utils';
 
 export type NavigationItem = {
@@ -14,13 +14,22 @@ export function AnimatedNavigationTabs({
   themesUnlocked,
   isThemesOpen,
   onThemesToggle,
+  activeId,
 }: {
   items: NavigationItem[];
   themesUnlocked: boolean;
   isThemesOpen: boolean;
   onThemesToggle: () => void;
+  activeId?: number;
 }) {
   const [active, setActive] = useState<NavigationItem>(items[0]);
+  // sync with external activeId (e.g. scroll observer in App)
+  React.useEffect(() => {
+    if (typeof activeId === 'number') {
+      const found = items.find((it) => it.id === activeId);
+      if (found) setActive(found);
+    }
+  }, [activeId, items]);
   const [isHover, setIsHover] = useState<NavigationItem | null>(null);
 
   const handleItemClick = (item: NavigationItem) => {
@@ -31,68 +40,60 @@ export function AnimatedNavigationTabs({
   };
 
   return (
-    <div className="relative flex items-center justify-center gap-2">
+    <div className="nav-tabs relative flex items-center justify-center gap-2">
       <div className="relative">
-        <ul className="flex items-center justify-center">
+        <ul className="nav-tabs__list flex items-center justify-center">
           {items.map((item) => (
             <motion.button
               key={item.id}
               className={cn(
-                'py-2 relative duration-300 transition-colors hover:text-foreground',
-                active.id === item.id ? 'text-foreground' : 'text-muted'
+                'nav-tabs__item relative duration-300 transition-colors',
+                active.id === item.id && 'nav-tabs__item--active'
               )}
+              type="button"
+              aria-current={active.id === item.id ? 'page' : undefined}
               onClick={() => handleItemClick(item)}
               onMouseEnter={() => setIsHover(item)}
               onMouseLeave={() => setIsHover(null)}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <div className="px-5 py-2 relative">
-                {item.tile}
-                {isHover?.id === item.id && (
-                  <motion.div
-                    layoutId="hover-bg"
-                    className="absolute bottom-0 left-0 right-0 h-full w-full bg-[color-mix(in_srgb,var(--text)_10%,transparent)]"
-                    style={{
-                      borderRadius: 6,
-                    }}
-                  />
-                )}
-              </div>
               {active.id === item.id && (
                 <motion.div
-                  layoutId="active"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 w-full bg-foreground"
+                  layoutId="active-tab-outline"
+                  className="nav-tabs__outline nav-tabs__outline--active"
                 />
               )}
               {isHover?.id === item.id && (
                 <motion.div
-                  layoutId="hover"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 w-full bg-foreground"
+                  layoutId="hover-tab-outline"
+                  className="nav-tabs__outline nav-tabs__outline--hover"
                 />
               )}
+              <span className="nav-tabs__label">{item.tile}</span>
             </motion.button>
           ))}
 
           {themesUnlocked && (
             <motion.button
               className={cn(
-                'py-2 relative duration-300 transition-colors hover:text-foreground',
-                isThemesOpen ? 'text-foreground' : 'text-muted'
+                'nav-tabs__item relative duration-300 transition-colors',
+                isThemesOpen && 'nav-tabs__item--active'
               )}
+              type="button"
               onClick={onThemesToggle}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               aria-label="Toggle themes menu"
               aria-expanded={isThemesOpen}
             >
-              <div className="px-5 py-2 relative">Themes</div>
               {isThemesOpen && (
                 <motion.div
-                  layoutId="themes-active"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 w-full bg-foreground"
+                  layoutId="themes-active-outline"
+                  className="nav-tabs__outline nav-tabs__outline--active"
                 />
               )}
+              <span className="nav-tabs__label">Themes</span>
             </motion.button>
           )}
         </ul>

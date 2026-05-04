@@ -1,18 +1,19 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { BlurFade } from "./ui/blur-fade";
 
 const MOCK_LOGS = [
   "bios: Scanning memory...",
   "bios: 32MB OK",
   "kernel: Booting...",
-  "kernel: Loading drivers [██████    ]",
+  "kernel: Loading drivers [######    ]",
   "kernel: Discovered CPU: 3D_ASCII_PROC_v1",
   "syslog: Mounting file systems...",
   "syslog: OK /",
   "network: Initializing eth0...",
   "network: Carrier detected",
   "init: Starting user session...",
-  "init: Welcome."
+  "init: Welcome.",
 ];
 
 interface BootSequenceProps {
@@ -29,7 +30,7 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
     let index = 0;
     const interval = setInterval(() => {
       if (index < MOCK_LOGS.length) {
-        setLogs(prev => [...prev, MOCK_LOGS[index]]);
+        setLogs((prev) => [...prev, MOCK_LOGS[index]]);
         index++;
       } else {
         clearInterval(interval);
@@ -47,26 +48,31 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
   }, []);
 
   useEffect(() => {
-    if (showHello) {
-      const timer = setTimeout(() => {
-        onComplete();
-      }, 500); // HELLO shows for 500ms
-      return () => clearTimeout(timer);
-    }
+    if (!showHello) return;
+
+    const timer = setTimeout(() => {
+      onComplete();
+    }, 1750);
+
+    return () => clearTimeout(timer);
   }, [showHello, onComplete]);
 
   return (
     <motion.div
       initial={{ opacity: 1 }}
-      exit={{ opacity: 0, transition: { duration: 0.4 } }}
+      exit={{ opacity: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } }}
       className="fixed inset-0 z-[100] bg-surface text-surface-tint font-code-sm text-code-sm p-4 overflow-hidden flex flex-col justify-end"
     >
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {!showHello ? (
-          <motion.div className="flex flex-col gap-1 w-full max-w-7xl mx-auto h-full justify-end pb-12">
+          <motion.div
+            key="boot-logs"
+            className="flex flex-col gap-1 w-full max-w-7xl mx-auto h-full justify-end pb-12"
+            exit={{ opacity: 0, y: -12, filter: "blur(8px)", transition: { duration: 0.28 } }}
+          >
             {logs.map((log, i) => (
               <motion.div
-                key={i}
+                key={`${log}-${i}`}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 className="whitespace-pre-wrap"
@@ -76,20 +82,32 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
             ))}
           </motion.div>
         ) : (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{
-              opacity: [0, 1, 0, 1, 1],
-              x: [0, -10, 10, -5, 0],
-              filter: ["contrast(1)", "contrast(5) invert(1)", "contrast(1)"],
-            }}
-            transition={{ duration: 0.4, ease: "linear" }}
-            className="absolute inset-0 flex items-center justify-center pointer-events-none"
-          >
-            <h1 className="font-display-lg text-[10vw] text-primary whitespace-pre">
-              HELLO
-            </h1>
-          </motion.div>
+          <div key="boot-hello" className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <BlurFade className="boot-hello" duration={0.72} yOffset={16} blur="18px">
+              <motion.h1
+                className="boot-hello__word"
+                initial={{ scale: 0.92, letterSpacing: "0.02em" }}
+                animate={{ scale: [0.92, 1.035, 1], letterSpacing: ["0.02em", "0.08em", "0.06em"] }}
+                transition={{ duration: 0.82, ease: [0.16, 1, 0.3, 1] }}
+              >
+                HELLO
+              </motion.h1>
+              <motion.span
+                className="boot-hello__emoji"
+                aria-hidden="true"
+                initial={{ opacity: 0, scale: 0.4, rotate: -24, y: 10 }}
+                animate={{
+                  opacity: 1,
+                  scale: [0.4, 1.18, 1],
+                  rotate: [-24, 16, -10, 14, -6, 0],
+                  y: [10, -3, 0],
+                }}
+                transition={{ delay: 0.22, duration: 1.18, ease: [0.16, 1, 0.3, 1] }}
+              >
+                👋
+              </motion.span>
+            </BlurFade>
+          </div>
         )}
       </AnimatePresence>
     </motion.div>

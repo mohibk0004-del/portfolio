@@ -1,15 +1,16 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState, useRef, useMemo, useCallback, lazy, Suspense, type FormEvent } from 'react';
 import Lenis from 'lenis';
+import gsap from 'gsap';
 import { BootSequence } from './components/BootSequence';
 import { SlideButton } from './components/ui/slide-button';
+import { ShowcaseHover } from './components/ui/showcase-hover';
 import { TextHoverEffect, FooterBackgroundGradient } from './components/ui/hover-footer';
 import { TextScramble } from './components/ui/text-scramble';
-import { GooeyText } from './components/ui/gooey-text-morphing';
-import InteractiveCharacter from './components/ui/interactive-3d-character';
 import { AnimatedNavigationTabs, type NavigationItem } from './components/ui/animated-navigation-tabs';
+import { Skiper19 } from './components/ui/svg-follow-scroll';
 import { SiGithub } from 'react-icons/si';
-import { Mail, Globe, Sun, Moon } from 'lucide-react';
+import { Mail, Globe } from 'lucide-react';
 import handsImage from './assets/hands.webp';
 import handsDarkImage from './assets/hands_black.webp';
 import handsHackImage from './assets/hands_hack.webp';
@@ -47,6 +48,7 @@ import { TbBrandCSharp } from 'react-icons/tb';
 import { DiPhotoshop, DiIllustrator } from 'react-icons/di';
 import { FaAws } from 'react-icons/fa6';
 import { VscAzure } from 'react-icons/vsc';
+import platformerVideo from './assets/platformer.mp4';
 
 const AsciiCpuCanvas = lazy(() =>
   import('./components/AsciiCpuCanvas').then((m) => ({ default: m.AsciiCpuCanvas }))
@@ -60,9 +62,21 @@ const DottedSurface = lazy(() =>
   import('./components/ui/dotted-surface').then((m) => ({ default: m.DottedSurface }))
 );
 
+const Waves = lazy(() =>
+  import('./components/ui/wave-background').then((m) => ({ default: m.Waves }))
+);
+
+import { GooeyText } from './components/ui/gooey-text-morphing';
+import { HoverBorderGradient } from './components/ui/hover-border-gradient';
+import { AnimatedThemeToggle } from './components/ui/animated-theme-toggle';
+
+const BACKGROUND_SURFACE: 'waves' | 'dotted' = 'waves';
+const HERO_PHRASES = ['MOHIB KHAN', 'CS STUDENT', 'AI + WEB DEV', 'GAME DEVELOPER'];
+
 type ThemeKey =
   | 'light'
   | 'dark'
+  | 'amoled'
   | 'hack'
   | 'decolumb'
   | 'gunmetal'
@@ -81,6 +95,36 @@ type ProjectLedger = {
   year: string;
   repo?: string;
   inDev?: boolean;
+  showcase?:
+  | {
+    type: 'video';
+    src: string;
+    title: string;
+  }
+  | {
+    type: 'youtube';
+    src: string;
+    title: string;
+  };
+};
+
+const InteractiveCharacter = () => {
+  return (
+    <div className="amna-character-card">
+      <div className="amna-character-stage" aria-hidden="true">
+        <div className="amna-character-orb" />
+        <div className="amna-character-head" />
+        <div className="amna-character-torso" />
+        <div className="amna-character-shadow" />
+      </div>
+      <div className="amna-character-copy">
+        <span className="amna-character-copy__eyebrow">AMNA MODE</span>
+        <p>
+          3D character sequence restored for love mode with the same terminal-brutalist mood.
+        </p>
+      </div>
+    </div>
+  );
 };
 
 const skillSets = [
@@ -101,6 +145,72 @@ const skillSets = [
     items: ['Unity', 'Unreal Engine', 'Blender', 'Photoshop', 'Illustrator', 'Figma', 'Framer', 'OpenCV'],
   },
 ];
+const marqueeSkills = [
+  'C',
+  'C++',
+  'C#',
+  'Python',
+  'JavaScript',
+  'React',
+  'Next.js',
+  'Node.js',
+  'Express',
+  'Flutter',
+  'Django',
+  '.NET',
+  'MySQL',
+  'PostgreSQL',
+  'MongoDB',
+  'Redis',
+  'AWS',
+  'Azure',
+  'Unity',
+  'Unreal',
+  'Blender',
+  'OpenCV',
+  'Figma',
+  'Framer',
+];
+
+const stackIconColor = (item: string) => {
+  const key = item.toLowerCase();
+  switch (key) {
+    case 'c': return '#2a6af0';
+    case 'c++': return '#6699ff';
+    case 'c#': return '#8a4fff';
+    case 'python': return '#ffd43b';
+    case 'javascript': return '#f7df1e';
+    case 'php': return '#8892bf';
+    case 'bash': return '#4dbf5a';
+    case 'html5': return '#e34f26';
+    case 'css3': return '#1572b6';
+    case 'react':
+    case 'react native': return '#61dafb';
+    case 'next.js': return '#ffffff';
+    case 'node.js': return '#539e43';
+    case 'express': return '#d8d8d8';
+    case 'flutter': return '#42a5f5';
+    case 'django': return '#0c7b46';
+    case '.net': return '#512bd4';
+    case 'electron': return '#7ec8e3';
+    case 'mysql': return '#4479a1';
+    case 'postgresql': return '#336791';
+    case 'mongodb': return '#4db33d';
+    case 'redis': return '#dc382d';
+    case 'aws': return '#ff9900';
+    case 'azure': return '#0078d4';
+    case 'heroku': return '#79589f';
+    case 'unity': return '#ffffff';
+    case 'unreal engine': return '#fefefe';
+    case 'blender': return '#f5792a';
+    case 'photoshop': return '#31a8ff';
+    case 'illustrator': return '#ff9a00';
+    case 'figma': return '#f24e1e';
+    case 'framer': return '#0055ff';
+    case 'opencv': return '#5c3ee8';
+    default: return 'currentColor';
+  }
+};
 
 const mappedIcon = (item: string) => {
   switch (item.toLowerCase()) {
@@ -162,6 +272,32 @@ const projectLedger: ProjectLedger[] = [
     year: 'IN DEVELOPMENT',
     repo: 'https://github.com/mohibk0004-del/HamsterGame',
     inDev: true,
+    showcase: {
+      type: 'video',
+      src: platformerVideo,
+      title: '3D platformer gameplay showcase',
+    },
+  },
+];
+
+const featuredShowcases = [
+  {
+    title: 'Valorant Edit on AE',
+    note: 'Highly edited VALORANT gameplay with advanced effects and speed ramping, edited on after effects and premiere pro.',
+    media: {
+      type: 'youtube' as const,
+      src: 'https://www.youtube.com/watch?v=e6k2tYyHop4',
+      title: 'Valorant Edit on AE showcase',
+    },
+  },
+  {
+    title: 'Lethal Company Edit w/ Subtitles',
+    note: 'Advanced edited lethal company gaming video with subtitles and comedic timing cuts, funny sound effects and viral editing style to attract viewership.',
+    media: {
+      type: 'youtube' as const,
+      src: 'https://www.youtube.com/watch?v=JVrj3tlU-m8',
+      title: 'Lethal Company Edit w/ Subtitles showcase',
+    },
   },
 ];
 
@@ -176,6 +312,7 @@ const heartStream = Array.from({ length: 22 }, (_, index) => ({
 const THEME_OPTIONS: { key: ThemeKey; label: string }[] = [
   { key: 'light', label: 'LIGHT' },
   { key: 'dark', label: 'DARK' },
+  { key: 'amoled', label: 'AMOLED' },
   { key: 'power', label: 'POWER' },
   { key: 'forest', label: 'FOREST_MINT' },
   { key: 'matcha', label: 'TOKYO_MATCHA' },
@@ -189,6 +326,7 @@ const THEME_OPTIONS: { key: ThemeKey; label: string }[] = [
 const ALL_THEME_KEYS = new Set<ThemeKey>([
   'light',
   'dark',
+  'amoled',
   'hack',
   'decolumb',
   'gunmetal',
@@ -215,41 +353,27 @@ function App() {
   const [renderPipelineVisible, setRenderPipelineVisible] = useState(false);
   const [selectedActive, setSelectedActive] = useState(true);
   const [projectTitleScrambleTick, setProjectTitleScrambleTick] = useState<Record<string, number>>({});
+  const [, setHeroPhraseIndex] = useState(0);
   const [terminalCommand, setTerminalCommand] = useState('ACCESS PORTFOLIO');
-  const [terminalMessage, setTerminalMessage] = useState('Type ACCESS PORTFOLIO and press Enter.');
-  const [nameGlitch, setNameGlitch] = useState(false);
+  const [terminalMessage, setTerminalMessage] = useState('TYPE ACCESS PORTFOLIO AND PRESS ENTER.');
   const terminalInputRef = useRef<HTMLInputElement>(null);
   const themeMenuRef = useRef<HTMLDivElement>(null);
 
   const hackThemeActive = theme === 'hack';
   const amnaThemeActive = theme === 'amna';
-  const showDottedSurface = !hackThemeActive && !booting;
-
-  const heroMorphTexts = useMemo(() => {
-    if (hackThemeActive && nameGlitch) {
-      return ['ERROR 404', 'SYSTEM BREACH', 'MOHIB KHAN'];
-    }
-
-    if (amnaThemeActive) {
-      return ['I love you', 'my amnasso', 'i mih you'];
-    }
-
-    if (theme === 'matcha') {
-      return ['MOHIB KHAN', 'CS STUDENT', 'AI + CYBERSECURITY', 'GAME DEVELOPMENT'];
-    }
-
-    return ['MOHIB KHAN', 'CS STUDENT', 'AI + CYBERSECURITY', 'GAME DEVELOPMENT', 'VIDEO EDITOR'];
-  }, [amnaThemeActive, hackThemeActive, nameGlitch, theme]);
+  const [backgroundSurfaceMode, setBackgroundSurfaceMode] = useState<'waves' | 'dotted'>(BACKGROUND_SURFACE);
+  const showDottedSurface = backgroundSurfaceMode === 'dotted' && !hackThemeActive && !booting;
+  const showWaveSurface = backgroundSurfaceMode === 'waves' && !hackThemeActive && !booting;
 
   const hackDrag = useMemo(
     () =>
       hackThemeActive
         ? {
-            drag: true as const,
-            dragMomentum: false,
-            dragElastic: 0.18,
-            whileDrag: { scale: 1.015, zIndex: 12 },
-          }
+          drag: true as const,
+          dragMomentum: false,
+          dragElastic: 0.18,
+          whileDrag: { scale: 1.015, zIndex: 12 },
+        }
         : {},
     [hackThemeActive]
   );
@@ -259,11 +383,6 @@ function App() {
       document.body.style.overflow = 'hidden';
       return;
     }
-    document.body.style.overflow = 'auto';
-  }, [booting]);
-
-  useEffect(() => {
-    if (booting) return;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduce) return;
     const lenis = new Lenis({
@@ -283,6 +402,16 @@ function App() {
       cancelAnimationFrame(rafId);
       lenis.destroy();
     };
+  }, [booting]);
+
+  useEffect(() => {
+    if (booting) return;
+
+    const timer = window.setInterval(() => {
+      setHeroPhraseIndex((index) => (index + 1) % HERO_PHRASES.length);
+    }, 5000);
+
+    return () => window.clearInterval(timer);
   }, [booting]);
 
   useEffect(() => {
@@ -368,40 +497,10 @@ function App() {
     };
   }, [hackThemeActive]);
 
-  useEffect(() => {
-    if (!hackThemeActive) {
-      setNameGlitch(false);
-      return;
-    }
-    let cancelled = false;
-    const timers = new Set<number>();
-    const queue = () => {
-      const wait = 4800 + Math.random() * 2400;
-      const t = window.setTimeout(() => {
-        if (cancelled) return;
-        setNameGlitch(true);
-        const t2 = window.setTimeout(() => {
-          if (!cancelled) setNameGlitch(false);
-          timers.delete(t2);
-        }, 280 + Math.random() * 220);
-        timers.add(t2);
-        timers.delete(t);
-        queue();
-      }, wait);
-      timers.add(t);
-    };
-    queue();
-    return () => {
-      cancelled = true;
-      timers.forEach((timer) => window.clearTimeout(timer));
-      timers.clear();
-    };
-  }, [hackThemeActive]);
-
   const heroImage = useMemo(() => {
     if (theme === 'amna') return handsAmnaImage;
     if (theme === 'hack') return handsHackImage;
-    if (theme === 'dark') return handsDarkImage;
+    if (theme === 'dark' || theme === 'amoled') return handsDarkImage;
     return handsImage;
   }, [theme]);
 
@@ -414,6 +513,30 @@ function App() {
     setThemeMenuOpen(false);
   }, []);
 
+  const smoothScrollTo = useCallback((targetId: string, delay = 80) => {
+    window.setTimeout(() => {
+      const target = document.getElementById(targetId);
+      if (!target) return;
+
+      const offset = 76;
+      const targetY = Math.max(0, target.getBoundingClientRect().top + window.scrollY - offset);
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (reduceMotion) {
+        window.scrollTo({ top: targetY });
+        return;
+      }
+
+      const scrollState = { y: window.scrollY };
+      gsap.to(scrollState, {
+        y: targetY,
+        duration: 1.35,
+        ease: 'power2.inOut',
+        onUpdate: () => window.scrollTo(0, scrollState.y),
+      });
+    }, delay);
+  }, []);
+
   const handleTerminalSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -422,8 +545,8 @@ function App() {
 
     if (normalized === 'ACCESS PORTFOLIO') {
       setTerminalUnlocked(true);
-      setTerminalMessage('Access granted. Try RENDER, THEME, or BITMAP.');
-      document.getElementById('stack')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTerminalMessage('ACCESS GRANTED. TRY RENDER, THEME, OR BITMAP.');
+      smoothScrollTo('workflow');
       terminalInputRef.current?.focus();
       return;
     }
@@ -431,22 +554,22 @@ function App() {
     if (normalized === 'RENDER') {
       setTerminalUnlocked(true);
       setRenderPipelineVisible(true);
-      setTerminalMessage('Render pipeline active. Scroll to the lower stack.');
-      document.getElementById('stack')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTerminalMessage('RENDER PIPELINE ACTIVE. SCROLL TO THE PIPELINE LANE.');
+      smoothScrollTo('pipeline', 100);
       return;
     }
 
     if (normalized === 'HACK') {
       setTheme('hack');
       setTerminalUnlocked(true);
-      setTerminalMessage('Mode switch complete.');
+      setTerminalMessage('MODE SWITCH COMPLETE.');
       return;
     }
 
     if (normalized === 'THEME' || normalized === 'THEMES') {
       setThemesUnlocked(true);
       setThemeMenuOpen(true);
-      setTerminalMessage('Theme tab unlocked. Open /THEME on the top bar.');
+      setTerminalMessage('THEME TAB UNLOCKED. OPEN /THEME ON THE TOP BAR.');
       return;
     }
 
@@ -455,21 +578,21 @@ function App() {
       const name = after.trim().toLowerCase() as ThemeKey;
       if (ALL_THEME_KEYS.has(name)) {
         if (name === 'amna') {
-          setTerminalMessage('Use AMNA to enter love mode.');
+          setTerminalMessage('USE AMNA TO ENTER LOVE MODE.');
           return;
         }
         if (name !== 'hack') setThemesUnlocked(true);
         setTheme(name);
-        setTerminalMessage(`Theme set: ${name.toUpperCase()}.`);
+        setTerminalMessage(`THEME SET: ${name.toUpperCase()}.`);
       } else {
-        setTerminalMessage('Unknown theme. Try LIGHT, DARK, POWER, FOREST, MATCHA, DECOLUMB, GUNMETAL, DUBAI, LUXURY.');
+        setTerminalMessage('UNKNOWN THEME. TRY LIGHT, DARK, AMOLED, POWER, FOREST, MATCHA, DECOLUMB, GUNMETAL, DUBAI, LUXURY.');
       }
       return;
     }
 
     if (normalized === 'BITMAP') {
       setBitmapMode((v) => !v);
-      setTerminalMessage('Bitmap mode toggled.');
+      setTerminalMessage('BITMAP MODE TOGGLED.');
       return;
     }
 
@@ -478,11 +601,11 @@ function App() {
       setTerminalUnlocked(true);
       setHeartsActive(true);
       setHeartsKey((value) => value + 1);
-      setTerminalMessage('AMNA mode engaged. Love stream online.');
+      setTerminalMessage('AMNA MODE ENGAGED. LOVE STREAM ONLINE.');
       return;
     }
 
-    setTerminalMessage('Command not recognized. Try ACCESS PORTFOLIO.');
+    setTerminalMessage('COMMAND NOT RECOGNIZED. TRY ACCESS PORTFOLIO.');
     terminalInputRef.current?.focus();
   };
 
@@ -490,11 +613,43 @@ function App() {
     return [
       { id: 1, tile: 'Home', href: '#hero', onClick: () => window.location.hash = '#hero' },
       { id: 2, tile: 'About', href: '#about', onClick: () => window.location.hash = '#about' },
-      { id: 3, tile: 'Projects', href: '#projects', onClick: () => window.location.hash = '#projects' },
-      { id: 4, tile: 'Stack', href: '#stack', onClick: () => window.location.hash = '#stack' },
+      { id: 3, tile: 'Stacks', href: '#stack', onClick: () => window.location.hash = '#stack' },
+      { id: 4, tile: 'Projects', href: '#projects', onClick: () => window.location.hash = '#projects' },
       { id: 5, tile: 'Contact', href: '#contact', onClick: () => window.location.hash = '#contact' },
     ];
   }, []);
+
+  const [activeNavId, setActiveNavId] = useState<number>(1);
+
+  // observe page sections and update active nav on scroll
+  useEffect(() => {
+    const idMap = new Map<string, number>();
+    navigationItems.forEach((it) => {
+      if (it.href) idMap.set(it.href.replace('#', ''), it.id);
+    });
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const id = entry.target.getAttribute('id');
+            if (id && idMap.has(id)) {
+              setActiveNavId(idMap.get(id)!);
+            }
+          }
+        });
+      },
+      { root: null, rootMargin: '0px', threshold: 0.5 }
+    );
+
+    navigationItems.forEach((it) => {
+      if (!it.href) return;
+      const el = document.getElementById(it.href.replace('#', ''));
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, [navigationItems]);
 
   const bumpProjectTitleScramble = useCallback((title: string) => {
     setProjectTitleScrambleTick((prev) => ({
@@ -517,11 +672,42 @@ function App() {
         </Suspense>
       )}
 
-      {showDottedSurface && (
-        <Suspense fallback={null}>
-          <DottedSurface />
-        </Suspense>
-      )}
+      <AnimatePresence mode="wait">
+        {showWaveSurface && (
+          <motion.div
+            key="wave-surface"
+            className="background-surface"
+            aria-hidden="true"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Suspense fallback={null}>
+              <Waves
+                className="page-waves"
+                strokeColor="var(--wave-stroke)"
+                backgroundColor="var(--wave-bg)"
+                pointerSize={0.3}
+              />
+            </Suspense>
+          </motion.div>
+        )}
+
+        {showDottedSurface && (
+          <motion.div
+            key="dotted-surface"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Suspense fallback={null}>
+              <DottedSurface />
+            </Suspense>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {bitmapMode && (
         <svg className="bitmap-defs" aria-hidden="true" focusable="false">
@@ -565,6 +751,7 @@ function App() {
             themesUnlocked={themesUnlocked}
             isThemesOpen={themeMenuOpen}
             onThemesToggle={() => setThemeMenuOpen((v) => !v)}
+            activeId={activeNavId}
           />
 
           {themesUnlocked && (
@@ -603,14 +790,16 @@ function App() {
           )}
         </div>
 
-        <button
-          className="topbar__theme-btn"
-          onClick={toggleLightDark}
-          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-          title={theme === 'dark' ? 'Light' : 'Dark'}
-        >
-          {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-        </button>
+        <div className="flex gap-2" style={{ gridColumn: 3, justifySelf: 'end' }}>
+          <HoverBorderGradient
+            onClick={() => setBackgroundSurfaceMode(backgroundSurfaceMode === 'waves' ? 'dotted' : 'waves')}
+            containerClassName="h-10 transition-all duration-200 active:scale-90 hover:scale-110"
+            className="px-3 py-1.5 text-xs font-semibold"
+          >
+            {backgroundSurfaceMode === 'waves' ? 'DOT' : 'WAVE'}
+          </HoverBorderGradient>
+          <AnimatedThemeToggle isDark={theme === 'dark'} onToggle={toggleLightDark} />
+        </div>
       </header>
 
       <main className="portfolio-main">
@@ -625,14 +814,7 @@ function App() {
           <span className="hero__coord hero__coord--right">[X:0001.Y:0001]</span>
 
           <motion.div className={`hero__copy${hackThemeActive ? ' hack-draggable' : ''}`} {...hackDrag}>
-            <TextScramble as="p" className="hero__eyebrow">Personal Document</TextScramble>
-            <GooeyText
-              texts={heroMorphTexts}
-              morphTime={0.8}
-              cooldownTime={amnaThemeActive ? 5 : 7}
-              className="hero__gooey"
-              textClassName="hero__gooey-text"
-            />
+            <GooeyText texts={HERO_PHRASES} className="w-full py-8 px-4" textClassName="font-serif text-5xl sm:text-6xl md:text-7xl font-bold leading-[0.9]" />
 
             <form className="terminal-box" onSubmit={handleTerminalSubmit}>
               <div className="terminal-box__bar">
@@ -641,10 +823,10 @@ function App() {
                   <i />
                   <i />
                 </span>
-                <span>root@mohib:~</span>
+                <span>ROOT@MOHIB:~</span>
               </div>
               <label className="terminal-box__prompt">
-                <span className="terminal-box__symbol">root@mohib:/$</span>
+                <span className="terminal-box__symbol">ROOT@MOHIB:/$</span>
                 <input
                   ref={terminalInputRef}
                   value={terminalCommand}
@@ -652,238 +834,306 @@ function App() {
                   autoComplete="off"
                   spellCheck={false}
                   aria-label="Terminal command"
-                  placeholder="access portfolio"
+                  placeholder="ACCESS PORTFOLIO"
                 />
               </label>
               <div className="terminal-box__actions">
-                <button type="submit" className="terminal-box__submit">run</button>
+                <button type="submit" className="terminal-box__submit">RUN</button>
               </div>
               <p className="terminal-box__message">{terminalMessage}</p>
             </form>
+
+            <div className="skills-marquee" aria-label="Live stack marquee">
+              <div className="skills-marquee__fade skills-marquee__fade--left" aria-hidden="true" />
+              <div className="skills-marquee__fade skills-marquee__fade--right" aria-hidden="true" />
+              <div className="skills-marquee__track skills-marquee__track--rtl" aria-hidden="true">
+                {[...marqueeSkills, ...marqueeSkills].map((skill, idx) => (
+                  <span key={`rtl-${skill}-${idx}`} className="skills-marquee__item">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+              <div className="skills-marquee__track skills-marquee__track--ltr" aria-hidden="true">
+                {[...marqueeSkills, ...marqueeSkills].map((skill, idx) => (
+                  <span key={`ltr-${skill}-${idx}`} className="skills-marquee__item">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
           </motion.div>
         </section>
 
         <AnimatePresence>
           {!amnaThemeActive && terminalUnlocked && (
-            <motion.section
+            <motion.div
               key="content-grid"
+              id="workflow"
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 8 }}
               transition={{ duration: 0.42, ease: [0.2, 0.8, 0.2, 1] }}
-              className={`content-grid${hackThemeActive ? ' hack-draggable' : ''}`}
-              id="stack"
+              className={hackThemeActive ? 'hack-draggable' : ''}
               {...hackDrag}
             >
-            <aside className="panel panel--left" id="about">
-              <article className="status-report">
-                <TextScramble as="span" className="status-report__title">{'[ STATUS_REPORT ]'}</TextScramble>
-                <p className="status-report__longform">
-                  I&apos;m a Computer Science student with a strong passion for Artificial Intelligence,
-                  Cybersecurity, and Game Development. When I&apos;m not writing code or building 3D environments,
-                  I&apos;m a photographer capturing moments with my Nikon D3500.
-                </p>
-              </article>
-
-            <section className="stack-matrix">
-              <TextScramble as="h2" className="section-label">// TOOL_MATRIX</TextScramble>
-
-              {skillSets.map((group) => (
-                <article className="stack-group" key={group.label}>
-                  <TextScramble as="h3">{group.label}</TextScramble>
-                  <div className="chip-row">
-                    {group.items.map((item) => (
-                      <span className="chip" key={item}>
-                        {mappedIcon(item)}
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-                </article>
-              ))}
-            </section>
-            </aside>
-
-            <div className="projects-column">
-              <div
-                className={`selected-output ${selectedActive ? 'selected-output--active' : ''}`}
-                role="button"
-                tabIndex={0}
-                onClick={() => setSelectedActive((v) => !v)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') setSelectedActive((v) => !v);
-                }}
+              <Skiper19
+                className="scroll-journey"
+                title={null}
+                subtitle="A compact overview of my engineering stack and selected builds, arranged in a brutalist scroll workflow."
               >
-                <div className="selected-output__title">
-                  <TextScramble as="em">Selected_Projects</TextScramble>
-                </div>
-                <TextScramble as="div" className="selected-output__drive">DRIVE:/PROJECTS/*</TextScramble>
-              </div>
+                <div className="scroll-journey-shell">
+                  <div className="scroll-journey-shell__left">
+                    <h2 className="workflow-column-title">STACKS</h2>
 
-              <section className="panel panel--right" id="projects">
-                <section className="project-ledger">
-                  {projectLedger.map((project, index) => (
-                    <motion.article
-                      className="ledger-row"
-                      key={project.title}
-                      initial={{ opacity: 0, y: 8 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, amount: 0.18 }}
-                      transition={{ duration: 0.42, ease: [0.2, 0.8, 0.2, 1], delay: index * 0.05 }}
-                      onViewportEnter={() => bumpProjectTitleScramble(project.title)}
-                      onMouseEnter={() => bumpProjectTitleScramble(project.title)}
-                      onFocusCapture={() => bumpProjectTitleScramble(project.title)}
-                    >
-                      <div className="ledger-row__index">[/&gt; {String(index + 1).padStart(2, '0')}]</div>
-                      <div className="ledger-row__content">
-                        <TextScramble
-                          as="h4"
-                          duration={1.55}
-                          speed={0.03}
-                          trigger={(projectTitleScrambleTick[project.title] ?? 0) > 0}
-                          replayToken={projectTitleScrambleTick[project.title] ?? 0}
-                        >
-                          {project.title}
-                        </TextScramble>
-                        <TextScramble as="p" duration={1.2} speed={0.025}>{project.note}</TextScramble>
-                        {project.repo && (
-                          <SlideButton
-                            href={project.repo}
-                            inDev={project.inDev}
-                            ariaLabel={
-                              project.inDev
-                                ? `${project.title} in development — repository private`
-                                : `Visit ${project.title} repository`
-                            }
-                          />
-                        )}
+                    <section className="scroll-section scroll-section--about" id="about">
+                      <article className="status-report">
+                        <TextScramble as="span" className="status-report__title">about me</TextScramble>
+                        <p className="status-report__longform">
+                          I&apos;m a Computer Science student with a strong passion for Artificial Intelligence,
+                          Cybersecurity, and Game Development. When I&apos;m not writing code or building 3D environments,
+                          I&apos;m also a photographer capturing moments with my Nikon D3500.
+                        </p>
+                      </article>
+                    </section>
+
+                    <section className="scroll-section scroll-section--stack" id="stack">
+                      <div className="scroll-section__header">
+                        <TextScramble as="h2" className="section-label">// TOOL_MATRIX</TextScramble>
+                        <p className="scroll-section__lede">
+                          Languages, frameworks, data stores, and creative tooling arranged as the first lane after unlock.
+                        </p>
                       </div>
-                      <div className="ledger-row__year">{project.year}</div>
-                    </motion.article>
-                  ))}
-                </section>
-              </section>
-            </div>
 
-            {renderPipelineVisible && !amnaThemeActive && (
-              <motion.section
-                className="render-pipeline"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, ease: [0.2, 0.8, 0.2, 1] }}
-              >
-                <div className="render-pipeline__frame">
-                  <div className="render-pipeline__header">
-                    <span className="render-pipeline__label">[ ASCII_RENDER_PIPELINE ]</span>
-                    <span className="render-pipeline__hint">/ unlocks after render</span>
+                      <div className="stack-matrix">
+                        {skillSets.map((group) => (
+                          <article className="stack-group" key={group.label}>
+                            <TextScramble as="h3">{group.label}</TextScramble>
+                            <div className="chip-row">
+                              {group.items.map((item) => (
+                                <span className="chip" key={item}>
+                                  <span className="chip__icon" style={{ color: stackIconColor(item) }}>
+                                    {mappedIcon(item)}
+                                  </span>
+                                  {item}
+                                </span>
+                              ))}
+                            </div>
+                          </article>
+                        ))}
+                      </div>
+
+                    </section>
                   </div>
-                  <div className="render-pipeline__canvas">
-                    <Suspense fallback={<div className="render-pipeline__placeholder">Loading pipeline...</div>}>
-                      <AsciiCpuCanvas />
-                    </Suspense>
+
+                  <div className="scroll-journey-shell__right">
+                    <h2 className="workflow-column-title workflow-column-title--projects">PROJECTS</h2>
+
+                    <section className="scroll-section scroll-section--projects" id="projects">
+                      <div
+                        className={`selected-output ${selectedActive ? 'selected-output--active' : ''}`}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => setSelectedActive((v) => !v)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') setSelectedActive((v) => !v);
+                        }}
+                      >
+                        <div className="selected-output__title">
+                          <TextScramble as="em">Selected_Projects</TextScramble>
+                        </div>
+                        <TextScramble as="div" className="selected-output__drive">DRIVE:/PROJECTS/*</TextScramble>
+                      </div>
+
+                      <section className="project-ledger">
+                        {projectLedger.map((project, index) => (
+                          <motion.article
+                            className="ledger-row"
+                            key={project.title}
+                            initial={{ opacity: 0, y: 8 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, amount: 0.18 }}
+                            transition={{ duration: 0.42, ease: [0.2, 0.8, 0.2, 1], delay: index * 0.05 }}
+                            onViewportEnter={() => bumpProjectTitleScramble(project.title)}
+                            onMouseEnter={() => bumpProjectTitleScramble(project.title)}
+                            onFocusCapture={() => bumpProjectTitleScramble(project.title)}
+                          >
+                            <div className="ledger-row__index">[/&gt; {String(index + 1).padStart(2, '0')}]</div>
+                            <div className="ledger-row__content">
+                              <TextScramble
+                                as="h4"
+                                duration={1.55}
+                                speed={0.03}
+                                trigger={(projectTitleScrambleTick[project.title] ?? 0) > 0}
+                                replayToken={projectTitleScrambleTick[project.title] ?? 0}
+                              >
+                                {project.title}
+                              </TextScramble>
+                              <TextScramble as="p" duration={1.2} speed={0.025}>{project.note}</TextScramble>
+                              {project.repo && (
+                                <SlideButton
+                                  href={project.repo}
+                                  inDev={project.inDev}
+                                  ariaLabel={
+                                    project.inDev
+                                      ? `${project.title} in development — repository private`
+                                      : `Visit ${project.title} repository`
+                                  }
+                                />
+                              )}
+                            </div>
+                            <div className="ledger-row__meta">
+                              <div className="ledger-row__year">{project.year}</div>
+                              {project.showcase && (
+                                <ShowcaseHover
+                                  media={project.showcase}
+                                  className="ledger-row__showcase"
+                                  label="showcase"
+                                  align="left"
+                                />
+                              )}
+                            </div>
+                          </motion.article>
+                        ))}
+                      </section>
+
+                      <div className="project-showcase-lane">
+                        {featuredShowcases.map((item, index) => (
+                          <article className="project-showcase-card" key={item.title}>
+                            <div className="project-showcase-card__header">
+                              <TextScramble as="h4" duration={1.1} speed={0.03} trigger>
+                                {item.title}
+                              </TextScramble>
+                              <span className="project-showcase-card__index">0{index + 1}</span>
+                            </div>
+                            <p className="project-showcase-card__copy">{item.note}</p>
+                            <div className="project-showcase-card__actions">
+                              <ShowcaseHover media={item.media} className="project-showcase-card__trigger" label="showcase" align="right" />
+                              <SlideButton href={item.media.src} ariaLabel={`Watch ${item.title}`} />
+                            </div>
+                          </article>
+                        ))}
+                      </div>
+                    </section>
                   </div>
                 </div>
-              </motion.section>
-            )}
-          </motion.section>
-        )}
+
+
+
+                {renderPipelineVisible && (
+                  <section className="render-pipeline render-pipeline--active scroll-section scroll-section--pipeline" id="pipeline">
+                    <div className="render-pipeline__frame">
+                      <div className="render-pipeline__header">
+                        <span className="render-pipeline__label">[ ASCII_RENDER_PIPELINE ]</span>
+                        <span className="render-pipeline__hint">/ unlocked</span>
+                      </div>
+                      <div className="render-pipeline__canvas">
+                        <Suspense fallback={<div className="render-pipeline__placeholder">Loading pipeline...</div>}>
+                          <AsciiCpuCanvas />
+                        </Suspense>
+                      </div>
+                    </div>
+                  </section>
+                )}
+              </Skiper19>
+            </motion.div>
+          )}
         </AnimatePresence>
       </main>
 
       <AnimatePresence>
-      {!amnaThemeActive && terminalUnlocked && (
-        <motion.footer
-          key="hover-footer"
-          className={`hover-footer${hackThemeActive ? ' hack-draggable' : ''}`}
-          id="contact"
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 8 }}
-          transition={{ duration: 0.42, ease: [0.2, 0.8, 0.2, 1] }}
-          {...hackDrag}
-        >
-          <div className="hover-footer__inner">
-            <div className="hover-footer__grid">
-              <div className="hover-footer__brand">
-                <div className="hover-footer__brand-row">
-                  <span className="hover-footer__heart">&hearts;</span>
-                  <TextScramble as="span" className="hover-footer__brand-name">MOHIB KHAN</TextScramble>
+        {!amnaThemeActive && terminalUnlocked && (
+          <motion.footer
+            key="hover-footer"
+            className={`hover-footer${hackThemeActive ? ' hack-draggable' : ''}`}
+            id="contact"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            transition={{ duration: 0.42, ease: [0.2, 0.8, 0.2, 1] }}
+            {...hackDrag}
+          >
+            <div className="hover-footer__inner">
+              <div className="hover-footer__grid">
+                <div className="hover-footer__brand">
+                  <div className="hover-footer__brand-row">
+                    <span className="hover-footer__heart">&hearts;</span>
+                    <TextScramble as="span" className="hover-footer__brand-name">MOHIB KHAN</TextScramble>
+                  </div>
+                  <p className="hover-footer__tagline">
+                    CS student building things in AI, cybersecurity, and game dev. Available for collaboration.
+                  </p>
                 </div>
-                <p className="hover-footer__tagline">
-                  CS student building things in AI, cybersecurity, and game dev. Available for collaboration.
+
+                <div className="hover-footer__col">
+                  <TextScramble as="h4">Navigate</TextScramble>
+                  <ul>
+                    <li><a href="#hero">Top</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#projects">Projects</a></li>
+                    <li><a href="#stack">Stack</a></li>
+                  </ul>
+                </div>
+
+                <div className="hover-footer__col">
+                  <TextScramble as="h4">Connect</TextScramble>
+                  <ul>
+                    <li>
+                      <a href="https://github.com/mohibk0004-del" target="_blank" rel="noreferrer">GitHub</a>
+                    </li>
+                    <li>
+                      <a href="mailto:mohibk0004@gmail.com">Email</a>
+                    </li>
+                    <li className="hover-footer__pulse-item">
+                      <a href="#projects">Open to work</a>
+                      <span className="hover-footer__pulse" aria-hidden="true" />
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="hover-footer__col">
+                  <TextScramble as="h4">Contact</TextScramble>
+                  <ul className="hover-footer__contact">
+                    <li>
+                      <Mail size={16} className="hover-footer__icon" />
+                      <a href="mailto:mohibk0004@gmail.com">mohibk0004@gmail.com</a>
+                    </li>
+                    <li>
+                      <Globe size={16} className="hover-footer__icon" />
+                      <span>Remote / GMT+5</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <hr className="hover-footer__rule" />
+
+              <div className="hover-footer__bottom">
+                <div className="hover-footer__socials">
+                  <a
+                    href="https://github.com/mohibk0004-del"
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="GitHub"
+                  >
+                    <SiGithub size={18} />
+                  </a>
+                  <a href="mailto:mohibk0004@gmail.com" aria-label="Email">
+                    <Mail size={18} />
+                  </a>
+                </div>
+                <p className="hover-footer__copy">
+                  &copy; {new Date().getFullYear()} Mohib Khan. All rights reserved.
                 </p>
               </div>
-
-              <div className="hover-footer__col">
-                <TextScramble as="h4">Navigate</TextScramble>
-                <ul>
-                  <li><a href="#hero">Top</a></li>
-                  <li><a href="#about">About</a></li>
-                  <li><a href="#projects">Projects</a></li>
-                  <li><a href="#stack">Stack</a></li>
-                </ul>
-              </div>
-
-              <div className="hover-footer__col">
-                <TextScramble as="h4">Connect</TextScramble>
-                <ul>
-                  <li>
-                    <a href="https://github.com/mohibk0004-del" target="_blank" rel="noreferrer">GitHub</a>
-                  </li>
-                  <li>
-                    <a href="mailto:mohibk0004@gmail.com">Email</a>
-                  </li>
-                  <li className="hover-footer__pulse-item">
-                    <a href="#projects">Open to work</a>
-                    <span className="hover-footer__pulse" aria-hidden="true" />
-                  </li>
-                </ul>
-              </div>
-
-              <div className="hover-footer__col">
-                <TextScramble as="h4">Contact</TextScramble>
-                <ul className="hover-footer__contact">
-                  <li>
-                    <Mail size={16} className="hover-footer__icon" />
-                    <a href="mailto:mohibk0004@gmail.com">mohibk0004@gmail.com</a>
-                  </li>
-                  <li>
-                    <Globe size={16} className="hover-footer__icon" />
-                    <span>Remote / GMT+5</span>
-                  </li>
-                </ul>
-              </div>
             </div>
 
-            <hr className="hover-footer__rule" />
-
-            <div className="hover-footer__bottom">
-              <div className="hover-footer__socials">
-                <a
-                  href="https://github.com/mohibk0004-del"
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label="GitHub"
-                >
-                  <SiGithub size={18} />
-                </a>
-                <a href="mailto:mohibk0004@gmail.com" aria-label="Email">
-                  <Mail size={18} />
-                </a>
-              </div>
-              <p className="hover-footer__copy">
-                &copy; {new Date().getFullYear()} Mohib Khan. All rights reserved.
-              </p>
+            <div className="hover-footer__hover-text" aria-hidden="true">
+              <TextHoverEffect text="MOHIB" strokeColor="var(--text)" />
             </div>
-          </div>
 
-          <div className="hover-footer__hover-text" aria-hidden="true">
-            <TextHoverEffect text="MOHIB" strokeColor="var(--text)" />
-          </div>
-
-          <FooterBackgroundGradient />
-        </motion.footer>
-      )}
+            <FooterBackgroundGradient />
+          </motion.footer>
+        )}
       </AnimatePresence>
 
       {amnaThemeActive && (

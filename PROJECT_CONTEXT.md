@@ -36,6 +36,7 @@ Current design notes
 - Serif headers + monospace UI.
 - Hero uses a theme-aware hands background image, a terminal access form, split dossier layout, and a dense system footer.
 - Footer social icons are local anchors and email only.
+- "go" means push to the GitHub repo and deploy to the mohib.app domain.
 
 What I changed (local)
 - Built a custom light-themed portfolio in `src/App.tsx`.
