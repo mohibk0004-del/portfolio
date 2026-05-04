@@ -15,12 +15,14 @@ export function AnimatedNavigationTabs({
   isThemesOpen,
   onThemesToggle,
   activeId,
+  themesButtonRef,
 }: {
   items: NavigationItem[];
   themesUnlocked: boolean;
   isThemesOpen: boolean;
   onThemesToggle: () => void;
   activeId?: number;
+  themesButtonRef?: React.Ref<HTMLButtonElement>;
 }) {
   const [active, setActive] = useState<NavigationItem>(items[0]);
   // sync with external activeId (e.g. scroll observer in App)
@@ -76,6 +78,7 @@ export function AnimatedNavigationTabs({
 
           {themesUnlocked && (
             <motion.button
+              ref={themesButtonRef}
               className={cn(
                 'nav-tabs__item relative duration-300 transition-colors',
                 isThemesOpen && 'nav-tabs__item--active'

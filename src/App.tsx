@@ -362,6 +362,7 @@ function App() {
   const [terminalMessage, setTerminalMessage] = useState('TYPE ACCESS PORTFOLIO AND PRESS ENTER.');
   const terminalInputRef = useRef<HTMLInputElement>(null);
   const themeMenuRef = useRef<HTMLDivElement>(null);
+  const themesButtonRef = useRef<HTMLButtonElement>(null);
   const themeMenuListRef = useRef<HTMLUListElement>(null);
   const themeMenuTimelineRef = useRef<gsap.core.Timeline | null>(null);
 
@@ -454,7 +455,11 @@ function App() {
   useEffect(() => {
     if (!themeMenuOpen) return;
     const onClick = (e: MouseEvent) => {
-      if (themeMenuRef.current && !themeMenuRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      const clickedInsideMenu = !!themeMenuRef.current?.contains(target);
+      const clickedThemesButton = !!themesButtonRef.current?.contains(target);
+
+      if (!clickedInsideMenu && !clickedThemesButton) {
         setThemeMenuOpen(false);
       }
     };
@@ -807,6 +812,7 @@ function App() {
             isThemesOpen={themeMenuOpen}
             onThemesToggle={() => setThemeMenuOpen((v) => !v)}
             activeId={activeNavId}
+            themesButtonRef={themesButtonRef}
           />
 
           {themesUnlocked && (
