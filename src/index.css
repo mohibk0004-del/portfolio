@@ -2315,6 +2315,10 @@ button {
   background: linear-gradient(135deg, #f6f4ee 0 50%, #111111 50% 100%);
 }
 
+.theme-menu__swatch--ivory {
+  background: linear-gradient(135deg, #ffffe3 0 50%, #111111 50% 100%);
+}
+
 .theme-menu__swatch--dark {
   background: linear-gradient(135deg, #111111 0 50%, #f4f0e8 50% 100%);
 }

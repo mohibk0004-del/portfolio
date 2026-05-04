@@ -347,6 +347,7 @@ function App() {
   const [theme, setTheme] = useState<ThemeKey>('light');
   const [themesUnlocked] = useState(true);
   const [themeMenuOpen, setThemeMenuOpen] = useState(false);
+  const [themeMenuRendered, setThemeMenuRendered] = useState(false);
   const [bitmapMode, setBitmapMode] = useState(false);
   const [glitching, setGlitching] = useState(false);
   const [glitchVariant, setGlitchVariant] = useState(0);
@@ -361,6 +362,8 @@ function App() {
   const [terminalMessage, setTerminalMessage] = useState('TYPE ACCESS PORTFOLIO AND PRESS ENTER.');
   const terminalInputRef = useRef<HTMLInputElement>(null);
   const themeMenuRef = useRef<HTMLDivElement>(null);
+  const themeMenuListRef = useRef<HTMLUListElement>(null);
+  const themeMenuTimelineRef = useRef<gsap.core.Timeline | null>(null);
 
   const hackThemeActive = theme === 'hack';
   const amnaThemeActive = theme === 'amna';
@@ -465,6 +468,69 @@ function App() {
       document.removeEventListener('keydown', onKey);
     };
   }, [themeMenuOpen]);
+
+  useEffect(() => {
+    if (themeMenuOpen) {
+      setThemeMenuRendered(true);
+    }
+  }, [themeMenuOpen]);
+
+  useEffect(() => {
+    const list = themeMenuListRef.current;
+    if (!list || !themeMenuRendered) return;
+
+    const items = Array.from(list.querySelectorAll('.theme-menu__item'));
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    themeMenuTimelineRef.current?.kill();
+
+    if (themeMenuOpen) {
+      if (reduceMotion) {
+        gsap.set(list, { autoAlpha: 1, y: 0, scale: 1 });
+        gsap.set(items, { autoAlpha: 1, y: 0 });
+        return;
+      }
+
+      gsap.set(list, { transformOrigin: 'top right' });
+      gsap.set(items, { autoAlpha: 0, y: -6 });
+
+      themeMenuTimelineRef.current = gsap.timeline({ defaults: { ease: 'power2.out' } });
+      themeMenuTimelineRef.current
+        .fromTo(
+          list,
+          { autoAlpha: 0, y: -10, scale: 0.985 },
+          { autoAlpha: 1, y: 0, scale: 1, duration: 0.24 }
+        )
+        .to(items, { autoAlpha: 1, y: 0, stagger: 0.018, duration: 0.18 }, '-=0.14');
+
+      return;
+    }
+
+    if (reduceMotion) {
+      gsap.set(list, { autoAlpha: 0 });
+      setThemeMenuRendered(false);
+      return;
+    }
+
+    themeMenuTimelineRef.current = gsap.timeline({
+      defaults: { ease: 'power2.in' },
+      onComplete: () => setThemeMenuRendered(false),
+    });
+
+    themeMenuTimelineRef.current
+      .to(items, { autoAlpha: 0, y: -4, stagger: { each: 0.012, from: 'end' }, duration: 0.12 })
+      .to(list, { autoAlpha: 0, y: -8, scale: 0.985, duration: 0.18 }, '-=0.06');
+
+    return () => {
+      themeMenuTimelineRef.current?.kill();
+    };
+  }, [themeMenuOpen, themeMenuRendered]);
+
+  useEffect(() => {
+    return () => {
+      themeMenuTimelineRef.current?.kill();
+    };
+  }, []);
 
   useEffect(() => {
     if (!hackThemeActive) {
@@ -748,16 +814,12 @@ function App() {
               className={`theme-menu theme-menu--anchored${themeMenuOpen ? ' theme-menu--open' : ''}`}
               ref={themeMenuRef}
             >
-              <AnimatePresence>
-                {themeMenuOpen && (
-                  <motion.ul
-                    role="menu"
-                    className="theme-menu__list"
-                    initial={{ opacity: 0, y: -4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -4 }}
-                    transition={{ duration: 0.16, ease: [0.2, 0.8, 0.2, 1] }}
-                  >
+              {themeMenuRendered && (
+                <ul
+                  role="menu"
+                  className="theme-menu__list"
+                  ref={themeMenuListRef}
+                >
                     {THEME_OPTIONS.map((opt) => (
                       <li key={opt.key} role="none">
                         <button
@@ -772,9 +834,8 @@ function App() {
                         </button>
                       </li>
                     ))}
-                  </motion.ul>
-                )}
-              </AnimatePresence>
+                </ul>
+              )}
             </div>
           )}
         </div>
