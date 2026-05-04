@@ -54,10 +54,6 @@ const AsciiCpuCanvas = lazy(() =>
   import('./components/AsciiCpuCanvas').then((m) => ({ default: m.AsciiCpuCanvas }))
 );
 
-const MatrixRain = lazy(() =>
-  import('./components/MatrixRain').then((m) => ({ default: m.MatrixRain }))
-);
-
 const DottedSurface = lazy(() =>
   import('./components/ui/dotted-surface').then((m) => ({ default: m.DottedSurface }))
 );
@@ -69,6 +65,7 @@ const Waves = lazy(() =>
 import { GooeyText } from './components/ui/gooey-text-morphing';
 import { HoverBorderGradient } from './components/ui/hover-border-gradient';
 import { AnimatedThemeToggle } from './components/ui/animated-theme-toggle';
+import { ValentineSnakeGame } from './components/ValentineSnakeGame';
 
 const BACKGROUND_SURFACE: 'waves' | 'dotted' = 'waves';
 const HERO_PHRASES = ['MOHIB KHAN', 'CS STUDENT', 'AI + WEB DEV', 'GAME DEVELOPER'];
@@ -107,25 +104,6 @@ type ProjectLedger = {
     src: string;
     title: string;
   };
-};
-
-const InteractiveCharacter = () => {
-  return (
-    <div className="amna-character-card">
-      <div className="amna-character-stage" aria-hidden="true">
-        <div className="amna-character-orb" />
-        <div className="amna-character-head" />
-        <div className="amna-character-torso" />
-        <div className="amna-character-shadow" />
-      </div>
-      <div className="amna-character-copy">
-        <span className="amna-character-copy__eyebrow">AMNA MODE</span>
-        <p>
-          3D character sequence restored for love mode with the same terminal-brutalist mood.
-        </p>
-      </div>
-    </div>
-  );
 };
 
 const skillSets = [
@@ -425,7 +403,13 @@ function App() {
     // Read persisted theme from localStorage if available, otherwise default to light
     const saved = window.localStorage.getItem('portfolio-theme');
     if (saved && ALL_THEME_KEYS.has(saved as ThemeKey)) {
-      setTheme(saved as ThemeKey);
+      const persisted = saved as ThemeKey;
+      if (persisted === 'hack' || persisted === 'amna') {
+        setTheme('light');
+        window.localStorage.setItem('portfolio-theme', 'light');
+      } else {
+        setTheme(persisted);
+      }
     } else {
       setTheme('light');
     }
@@ -627,7 +611,7 @@ function App() {
 
     if (normalized === 'ACCESS PORTFOLIO') {
       setTerminalUnlocked(true);
-      setTerminalMessage('ACCESS GRANTED. TRY RENDER, THEME, OR BITMAP.');
+      setTerminalMessage('ACCESS GRANTED. TRY TYPING RENDER OR BITMAP.');
       smoothScrollTo('workflow');
       terminalInputRef.current?.focus();
       return;
@@ -726,12 +710,6 @@ function App() {
 
       <div className="page-noise" aria-hidden="true" />
 
-      {hackThemeActive && (
-        <Suspense fallback={null}>
-          <MatrixRain />
-        </Suspense>
-      )}
-
       <AnimatePresence mode="wait">
         {showWaveSurface && (
           <motion.div
@@ -826,20 +804,20 @@ function App() {
                   className="theme-menu__list"
                   ref={themeMenuListRef}
                 >
-                    {THEME_OPTIONS.map((opt) => (
-                      <li key={opt.key} role="none">
-                        <button
-                          role="menuitemradio"
-                          aria-checked={theme === opt.key}
-                          className={`theme-menu__item${theme === opt.key ? ' theme-menu__item--active' : ''}`}
-                          type="button"
-                          onClick={() => pickTheme(opt.key)}
-                        >
-                          <span className={`theme-menu__swatch theme-menu__swatch--${opt.key}`} aria-hidden="true" />
-                          {opt.label}
-                        </button>
-                      </li>
-                    ))}
+                  {THEME_OPTIONS.map((opt) => (
+                    <li key={opt.key} role="none">
+                      <button
+                        role="menuitemradio"
+                        aria-checked={theme === opt.key}
+                        className={`theme-menu__item${theme === opt.key ? ' theme-menu__item--active' : ''}`}
+                        type="button"
+                        onClick={() => pickTheme(opt.key)}
+                      >
+                        <span className={`theme-menu__swatch theme-menu__swatch--${opt.key}`} aria-hidden="true" />
+                        {opt.label}
+                      </button>
+                    </li>
+                  ))}
                 </ul>
               )}
             </div>
@@ -1194,7 +1172,7 @@ function App() {
 
       {amnaThemeActive && (
         <div className="amna-character-wrap" style={{ width: '100%', display: 'flex', justifyContent: 'center', padding: '2rem 0' }}>
-          <InteractiveCharacter />
+          <ValentineSnakeGame />
         </div>
       )}
     </div>

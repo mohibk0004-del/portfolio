@@ -2065,6 +2065,15 @@ button {
     grid-template-columns: 1fr;
     width: min(100%, 36rem);
   }
+
+  .valentine-snake {
+    width: min(100%, 38rem);
+    padding: 1rem;
+  }
+
+  .valentine-snake__board {
+    width: min(100%, 28rem);
+  }
 }
 
 @media (max-width: 640px) {
@@ -2232,6 +2241,18 @@ button {
 
   .amna-character-stage {
     min-height: 10.2rem;
+  }
+
+  .valentine-snake__hud {
+    gap: 0.45rem;
+  }
+
+  .valentine-snake__btn {
+    margin-left: 0;
+  }
+
+  .valentine-snake__board {
+    width: 100%;
   }
 
   .system-footer__stats {
@@ -2620,6 +2641,118 @@ button {
   margin: 0;
   color: var(--text);
   line-height: 1.8;
+}
+
+.valentine-snake {
+  width: min(100%, 54rem);
+  display: grid;
+  gap: 0.85rem;
+  padding: 1.2rem;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 88%, var(--bg));
+  box-shadow: 0 0.85rem 2rem var(--shadow);
+}
+
+.valentine-snake__header {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.valentine-snake__eyebrow {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.valentine-snake__title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(1.6rem, 1.6vw + 1rem, 2.25rem);
+  line-height: 1;
+}
+
+.valentine-snake__hud {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.valentine-snake__btn {
+  margin-left: auto;
+  border: 1px solid var(--line);
+  background: var(--text);
+  color: var(--bg);
+  padding: 0.36rem 0.68rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.valentine-snake__btn:hover,
+.valentine-snake__btn:focus-visible {
+  opacity: 0.86;
+  outline: none;
+}
+
+.valentine-snake__board {
+  display: grid;
+  width: min(100%, 32rem);
+  aspect-ratio: 1;
+  border: 1px solid var(--line-soft);
+  background:
+    radial-gradient(circle at 15% 14%, rgba(255, 255, 255, 0.18), transparent 36%),
+    color-mix(in srgb, var(--bg) 84%, #f9c9d8 16%);
+  overflow: hidden;
+}
+
+.valentine-snake__cell {
+  border-right: 1px solid color-mix(in srgb, var(--line-soft) 46%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--line-soft) 46%, transparent);
+}
+
+.valentine-snake__cell--body {
+  background: color-mix(in srgb, #f06292 62%, var(--bg));
+}
+
+.valentine-snake__cell--head {
+  background: color-mix(in srgb, #d81b60 78%, var(--bg));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.36);
+}
+
+.valentine-snake__cell--food {
+  position: relative;
+  background: color-mix(in srgb, #ffd6e3 78%, var(--bg));
+}
+
+.valentine-snake__cell--food::after {
+  content: '♥';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #d81b60;
+  font-size: 0.66rem;
+  line-height: 1;
+}
+
+.valentine-snake__hint {
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 @keyframes amna-orb-float {
