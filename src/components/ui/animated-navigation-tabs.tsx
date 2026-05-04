@@ -50,6 +50,7 @@ export function AnimatedNavigationTabs({
               key={item.id}
               className={cn(
                 'nav-tabs__item relative duration-300 transition-colors',
+                (item.id === 3 || item.id === 4) && 'nav-tabs__item--glass',
                 active.id === item.id && 'nav-tabs__item--active'
               )}
               type="button"

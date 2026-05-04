@@ -7,7 +7,8 @@ import { SlideButton } from './components/ui/slide-button';
 import { ShowcaseHover } from './components/ui/showcase-hover';
 import { TextHoverEffect, FooterBackgroundGradient } from './components/ui/hover-footer';
 import { TextScramble } from './components/ui/text-scramble';
-import { AnimatedNavigationTabs, type NavigationItem } from './components/ui/animated-navigation-tabs';
+import type { NavigationItem } from './components/ui/animated-navigation-tabs';
+import MacOSMenuBar from './components/ui/mac-os-menu-bar';
 import { Skiper19 } from './components/ui/svg-follow-scroll';
 import { SiGithub } from 'react-icons/si';
 import { Mail, Globe } from 'lucide-react';
@@ -323,9 +324,7 @@ const ALL_THEME_KEYS = new Set<ThemeKey>([
 function App() {
   const [booting, setBooting] = useState(true);
   const [theme, setTheme] = useState<ThemeKey>('light');
-  const [themesUnlocked] = useState(true);
   const [themeMenuOpen, setThemeMenuOpen] = useState(false);
-  const [themeMenuRendered, setThemeMenuRendered] = useState(false);
   const [bitmapMode, setBitmapMode] = useState(false);
   const [glitching, setGlitching] = useState(false);
   const [glitchVariant, setGlitchVariant] = useState(0);
@@ -339,16 +338,12 @@ function App() {
   const [terminalCommand, setTerminalCommand] = useState('ACCESS PORTFOLIO');
   const [terminalMessage, setTerminalMessage] = useState('TYPE ACCESS PORTFOLIO AND PRESS ENTER.');
   const terminalInputRef = useRef<HTMLInputElement>(null);
-  const themeMenuRef = useRef<HTMLDivElement>(null);
-  const themesButtonRef = useRef<HTMLButtonElement>(null);
-  const themeMenuListRef = useRef<HTMLUListElement>(null);
-  const themeMenuTimelineRef = useRef<gsap.core.Timeline | null>(null);
 
   const hackThemeActive = theme === 'hack';
   const amnaThemeActive = theme === 'amna';
   const [backgroundSurfaceMode, setBackgroundSurfaceMode] = useState<'waves' | 'dotted'>(BACKGROUND_SURFACE);
-  const showDottedSurface = backgroundSurfaceMode === 'dotted' && !hackThemeActive && !booting;
-  const showWaveSurface = backgroundSurfaceMode === 'waves' && !hackThemeActive && !booting;
+  const showDottedSurface = backgroundSurfaceMode === 'dotted' && !booting;
+  const showWaveSurface = backgroundSurfaceMode === 'waves' && !booting;
 
   const hackDrag = useMemo(
     () =>
@@ -435,91 +430,6 @@ function App() {
     document.documentElement.dataset.bitmap = bitmapMode ? '1' : '0';
   }, [bitmapMode]);
 
-
-  useEffect(() => {
-    if (!themeMenuOpen) return;
-    const onClick = (e: MouseEvent) => {
-      const target = e.target as Node;
-      const clickedInsideMenu = !!themeMenuRef.current?.contains(target);
-      const clickedThemesButton = !!themesButtonRef.current?.contains(target);
-
-      if (!clickedInsideMenu && !clickedThemesButton) {
-        setThemeMenuOpen(false);
-      }
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setThemeMenuOpen(false);
-    };
-    document.addEventListener('mousedown', onClick);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('mousedown', onClick);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [themeMenuOpen]);
-
-  useEffect(() => {
-    if (themeMenuOpen) {
-      setThemeMenuRendered(true);
-    }
-  }, [themeMenuOpen]);
-
-  useEffect(() => {
-    const list = themeMenuListRef.current;
-    if (!list || !themeMenuRendered) return;
-
-    const items = Array.from(list.querySelectorAll('.theme-menu__item'));
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    themeMenuTimelineRef.current?.kill();
-
-    if (themeMenuOpen) {
-      if (reduceMotion) {
-        gsap.set(list, { autoAlpha: 1, y: 0, scale: 1 });
-        gsap.set(items, { autoAlpha: 1, y: 0 });
-        return;
-      }
-
-      gsap.set(list, { transformOrigin: 'top right' });
-      gsap.set(items, { autoAlpha: 0, y: -6 });
-
-      themeMenuTimelineRef.current = gsap.timeline({ defaults: { ease: 'power2.out' } });
-      themeMenuTimelineRef.current
-        .fromTo(
-          list,
-          { autoAlpha: 0, y: -10, scale: 0.985 },
-          { autoAlpha: 1, y: 0, scale: 1, duration: 0.24 }
-        )
-        .to(items, { autoAlpha: 1, y: 0, stagger: 0.018, duration: 0.18 }, '-=0.14');
-
-      return;
-    }
-
-    if (reduceMotion) {
-      gsap.set(list, { autoAlpha: 0 });
-      setThemeMenuRendered(false);
-      return;
-    }
-
-    themeMenuTimelineRef.current = gsap.timeline({
-      defaults: { ease: 'power2.in' },
-      onComplete: () => setThemeMenuRendered(false),
-    });
-
-    themeMenuTimelineRef.current
-      .to(items, { autoAlpha: 0, y: -4, stagger: { each: 0.012, from: 'end' }, duration: 0.12 })
-      .to(list, { autoAlpha: 0, y: -8, scale: 0.985, duration: 0.18 }, '-=0.06');
-
-    return () => {
-      themeMenuTimelineRef.current?.kill();
-    };
-  }, [themeMenuOpen, themeMenuRendered]);
-
-  useEffect(() => {
-    return () => {
-      themeMenuTimelineRef.current?.kill();
-    };
-  }, []);
 
   useEffect(() => {
     if (!hackThemeActive) {
@@ -655,11 +565,11 @@ function App() {
 
   const navigationItems: NavigationItem[] = useMemo(() => {
     return [
-      { id: 1, tile: 'Home', href: '#hero', onClick: () => window.location.hash = '#hero' },
-      { id: 2, tile: 'About', href: '#about', onClick: () => window.location.hash = '#about' },
-      { id: 3, tile: 'Stacks', href: '#stack', onClick: () => window.location.hash = '#stack' },
-      { id: 4, tile: 'Projects', href: '#projects', onClick: () => window.location.hash = '#projects' },
-      { id: 5, tile: 'Contact', href: '#contact', onClick: () => window.location.hash = '#contact' },
+      { id: 1, tile: 'home', href: '#hero', onClick: () => window.location.hash = '#hero' },
+      { id: 2, tile: 'about', href: '#about', onClick: () => window.location.hash = '#about' },
+      { id: 3, tile: 'stacks', href: '#stack', onClick: () => window.location.hash = '#stack' },
+      { id: 4, tile: 'projects', href: '#projects', onClick: () => window.location.hash = '#projects' },
+      { id: 5, tile: 'contact', href: '#contact', onClick: () => window.location.hash = '#contact' },
     ];
   }, []);
 
@@ -782,58 +692,33 @@ function App() {
       )}
 
       <header className="topbar">
-        <div className="topbar__brand">MOHIB KHAN</div>
-        <div className="topbar__menu" aria-label="Primary navigation">
-          <AnimatedNavigationTabs
-            items={navigationItems}
-            themesUnlocked={themesUnlocked}
-            isThemesOpen={themeMenuOpen}
-            onThemesToggle={() => setThemeMenuOpen((v) => !v)}
-            activeId={activeNavId}
-            themesButtonRef={themesButtonRef}
-          />
-
-          {themesUnlocked && (
-            <div
-              className={`theme-menu theme-menu--anchored${themeMenuOpen ? ' theme-menu--open' : ''}`}
-              ref={themeMenuRef}
-            >
-              {themeMenuRendered && (
-                <ul
-                  role="menu"
-                  className="theme-menu__list"
-                  ref={themeMenuListRef}
-                >
-                  {THEME_OPTIONS.map((opt) => (
-                    <li key={opt.key} role="none">
-                      <button
-                        role="menuitemradio"
-                        aria-checked={theme === opt.key}
-                        className={`theme-menu__item${theme === opt.key ? ' theme-menu__item--active' : ''}`}
-                        type="button"
-                        onClick={() => pickTheme(opt.key)}
-                      >
-                        <span className={`theme-menu__swatch theme-menu__swatch--${opt.key}`} aria-hidden="true" />
-                        {opt.label}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          )}
-        </div>
-
-        <div className="flex gap-2" style={{ gridColumn: 3, justifySelf: 'end' }}>
-          <HoverBorderGradient
-            onClick={() => setBackgroundSurfaceMode(backgroundSurfaceMode === 'waves' ? 'dotted' : 'waves')}
-            containerClassName="h-10 transition-all duration-200 active:scale-90 hover:scale-110"
-            className="px-3 py-1.5 text-xs font-semibold"
-          >
-            {backgroundSurfaceMode === 'waves' ? 'DOT' : 'WAVE'}
-          </HoverBorderGradient>
-          <AnimatedThemeToggle isDark={theme === 'dark'} onToggle={toggleLightDark} />
-        </div>
+        <MacOSMenuBar
+          name="MOHIB KHAN"
+          items={navigationItems.map((item) => ({ id: item.id, label: item.tile, onClick: item.onClick }))}
+          isThemesOpen={themeMenuOpen}
+          onThemesToggle={() => setThemeMenuOpen((v) => !v)}
+          onThemesClose={() => setThemeMenuOpen(false)}
+          activeTheme={theme}
+          themeOptions={THEME_OPTIONS}
+          onThemeSelect={(next) => pickTheme(next as ThemeKey)}
+          activeId={activeNavId}
+          rightSlot={
+            <>
+              <HoverBorderGradient
+                onClick={() => setBackgroundSurfaceMode(backgroundSurfaceMode === 'waves' ? 'dotted' : 'waves')}
+                containerClassName="mac-menu-bar__control mac-menu-bar__control--surface"
+                className="mac-menu-bar__control-inner"
+              >
+                {backgroundSurfaceMode === 'waves' ? 'DOT' : 'WAVE'}
+              </HoverBorderGradient>
+              <AnimatedThemeToggle
+                isDark={theme === 'dark'}
+                onToggle={toggleLightDark}
+                className="mac-menu-bar__theme-toggle"
+              />
+            </>
+          }
+        />
       </header>
 
       <main className="portfolio-main">

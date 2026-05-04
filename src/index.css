@@ -17,6 +17,8 @@
   --hero-eyebrow: #4c4944;
   --hero-title: #111111;
   --hero-subtitle: #4c4944;
+  --hero-glow: color-mix(in srgb, var(--hero-title) 24%, transparent);
+  --hero-glow-soft: color-mix(in srgb, var(--line) 14%, transparent);
   --love-heart: #ff2d55;
   --matrix-active: var(--hero-title);
   --matrix-glow: color-mix(in srgb, var(--hero-title) 54%, transparent);
@@ -26,20 +28,22 @@
 }
 
 :root[data-theme='dark'] {
-  --bg: #111111;
-  --bg-soft: #191919;
-  --bg-rgb: 17, 17, 17;
-  --surface: rgba(24, 24, 24, 0.92);
-  --surface-solid: #151515;
+  --bg: #050505;
+  --bg-soft: #090909;
+  --bg-rgb: 5, 5, 5;
+  --surface: rgba(7, 7, 7, 0.92);
+  --surface-solid: #080808;
   --text: #f4f0e8;
-  --muted: #beb7ac;
-  --line: rgba(244, 240, 232, 0.88);
-  --line-soft: rgba(244, 240, 232, 0.52);
-  --shadow: rgba(0, 0, 0, 0.38);
+  --muted: #a8a196;
+  --line: rgba(244, 240, 232, 0.72);
+  --line-soft: rgba(244, 240, 232, 0.32);
+  --shadow: rgba(0, 0, 0, 0.68);
   color-scheme: dark;
   --hero-eyebrow: #f4f0e8;
   --hero-title: #ffffff;
   --hero-subtitle: #f4f0e8;
+  --hero-glow: rgba(244, 240, 232, 0.2);
+  --hero-glow-soft: rgba(244, 240, 232, 0.1);
   --wave-stroke: color-mix(in srgb, #f4f0e8 30%, transparent);
 }
 
@@ -60,6 +64,8 @@
   --hero-subtitle: #b5bac1;
   --matrix-active: #5865f2;
   --matrix-glow: rgba(88, 101, 242, 0.72);
+  --hero-glow: rgba(88, 101, 242, 0.34);
+  --hero-glow-soft: rgba(148, 155, 255, 0.13);
   --wave-bg: #000000;
   --wave-stroke: rgba(88, 101, 242, 0.44);
 }
@@ -81,6 +87,8 @@
   --hero-subtitle: #00ff41;
   --matrix-active: #00ff41;
   --matrix-glow: rgba(0, 255, 65, 0.72);
+  --hero-glow: rgba(0, 255, 65, 0.24);
+  --hero-glow-soft: rgba(0, 255, 65, 0.12);
   --wave-bg: #020602;
   --wave-stroke: rgba(0, 255, 65, 0.34);
 }
@@ -100,6 +108,8 @@
   --hero-eyebrow: #f5a53a;
   --hero-title: #ffffff;
   --hero-subtitle: #ffffff;
+  --hero-glow: rgba(245, 165, 58, 0.28);
+  --hero-glow-soft: rgba(245, 165, 58, 0.12);
 }
 
 :root[data-theme='gunmetal'] {
@@ -117,6 +127,8 @@
   --hero-eyebrow: #ed254e;
   --hero-title: #ed254e;
   --hero-subtitle: rgba(237, 37, 78, 0.85);
+  --hero-glow: rgba(237, 37, 78, 0.28);
+  --hero-glow-soft: rgba(237, 37, 78, 0.12);
 }
 
 :root[data-theme='dubai'] {
@@ -134,6 +146,8 @@
   --hero-eyebrow: #86a88e;
   --hero-title: #86a88e;
   --hero-subtitle: #754a70;
+  --hero-glow: rgba(134, 168, 142, 0.28);
+  --hero-glow-soft: rgba(117, 74, 112, 0.16);
 }
 
 :root[data-theme='luxury'] {
@@ -151,6 +165,8 @@
   --hero-eyebrow: #8b6f3a;
   --hero-title: #5b3f1f;
   --hero-subtitle: #8b6f3a;
+  --hero-glow: rgba(139, 111, 58, 0.24);
+  --hero-glow-soft: rgba(91, 63, 31, 0.1);
 }
 
 :root[data-theme='power'] {
@@ -168,6 +184,8 @@
   --hero-eyebrow: #ff6100;
   --hero-title: #ff6100;
   --hero-subtitle: rgba(255, 166, 112, 0.92);
+  --hero-glow: rgba(255, 97, 0, 0.32);
+  --hero-glow-soft: rgba(255, 166, 112, 0.12);
 }
 
 :root[data-theme='forest'] {
@@ -185,6 +203,8 @@
   --hero-eyebrow: #dae2cb;
   --hero-title: #dae2cb;
   --hero-subtitle: rgba(218, 226, 203, 0.86);
+  --hero-glow: rgba(218, 226, 203, 0.2);
+  --hero-glow-soft: rgba(218, 226, 203, 0.1);
 }
 
 :root[data-theme='matcha'] {
@@ -202,6 +222,8 @@
   --hero-eyebrow: #6f8340;
   --hero-title: #6f8340;
   --hero-subtitle: rgba(111, 131, 64, 0.86);
+  --hero-glow: rgba(111, 131, 64, 0.24);
+  --hero-glow-soft: rgba(156, 167, 100, 0.14);
   --font-serif: 'Noto Serif JP', 'Playfair Display', 'Times New Roman', serif;
   --font-mono: 'Noto Sans JP', 'IBM Plex Mono', 'Space Mono', 'Courier New', monospace;
 }
@@ -220,6 +242,8 @@
   --hero-eyebrow: #838f58;
   --hero-title: #838f58;
   --hero-subtitle: #7c8654;
+  --hero-glow: rgba(240, 98, 146, 0.24);
+  --hero-glow-soft: rgba(131, 143, 88, 0.14);
   --love-heart: #f06292;
   color-scheme: light;
 }
@@ -239,6 +263,8 @@
   --hero-eyebrow: #111111;
   --hero-title: #111111;
   --hero-subtitle: #6b6b6b;
+  --hero-glow: rgba(255, 59, 48, 0.2);
+  --hero-glow-soft: rgba(17, 17, 17, 0.08);
 }
 
 .theme-menu__swatch--halftone {
@@ -648,15 +674,249 @@ button {
   position: sticky;
   top: 0;
   z-index: 20;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  align-items: center;
-  gap: 1.2rem;
-  padding: 0.85rem 1rem;
-  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  display: block;
+  padding: 0.48rem 0.72rem;
+  background: color-mix(in srgb, var(--bg) 76%, transparent);
   border-bottom: 1px solid var(--line);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(18px) saturate(1.16);
+  -webkit-backdrop-filter: blur(18px) saturate(1.16);
   overflow: visible;
+}
+
+.mac-menu-bar {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  min-height: 2rem;
+  padding: 0.26rem 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--line-soft) 52%, transparent);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent),
+    color-mix(in srgb, var(--surface) 72%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 0.55rem 1.5rem color-mix(in srgb, var(--shadow) 56%, transparent);
+  color: var(--text);
+  font-family: var(--font-mono);
+}
+
+.mac-menu-bar__menus {
+  display: flex;
+  align-items: center;
+  justify-self: start;
+  min-width: 0;
+  gap: clamp(0.85rem, 2vw, 1.35rem);
+}
+
+.mac-menu-bar__left,
+.mac-menu-bar__nav,
+.mac-menu-bar__right {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.mac-menu-bar__left {
+  gap: 0.45rem;
+  justify-self: start;
+}
+
+.mac-menu-bar__mark {
+  display: inline-grid;
+  place-items: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 0.24rem;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.mac-menu-bar__name {
+  font-family: var(--font-serif);
+  font-size: 0.98rem;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.mac-menu-bar__nav {
+  justify-self: start;
+  gap: clamp(0.55rem, 1.9vw, 1.25rem);
+}
+
+.mac-menu-bar__item {
+  border: 0;
+  border-radius: 0.36rem;
+  padding: 0.18rem 0.34rem;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: none;
+  cursor: pointer;
+}
+
+.mac-menu-bar__item:hover,
+.mac-menu-bar__item:focus-visible,
+.mac-menu-bar__item--active {
+  color: var(--text);
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  outline: none;
+}
+
+.mac-menu-bar__item--themes {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.mac-menu-bar__theme-wrap {
+  position: relative;
+}
+
+.mac-menu-dropdown {
+  position: absolute;
+  top: calc(100% + 0.42rem);
+  left: 0;
+  z-index: 60;
+  display: grid;
+  gap: 0.12rem;
+  min-width: 13.5rem;
+  padding: 0.36rem;
+  border: 1px solid color-mix(in srgb, var(--line-soft) 54%, transparent);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent),
+    color-mix(in srgb, var(--surface-solid) 76%, transparent);
+  box-shadow:
+    0 0.85rem 2.2rem color-mix(in srgb, var(--shadow) 84%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(16px) saturate(1.14);
+  -webkit-backdrop-filter: blur(16px) saturate(1.14);
+  transform-origin: top left;
+}
+
+.mac-menu-dropdown__item {
+  display: flex;
+  align-items: center;
+  gap: 0.58rem;
+  width: 100%;
+  min-height: 1.58rem;
+  padding: 0.28rem 0.55rem;
+  border: 0;
+  border-radius: 0.34rem;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-align: left;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.mac-menu-dropdown__item:hover,
+.mac-menu-dropdown__item:focus-visible,
+.mac-menu-dropdown__item--active {
+  background: color-mix(in srgb, var(--text) 12%, transparent);
+  outline: none;
+}
+
+.mac-menu-bar__right {
+  justify-self: end;
+  gap: 0.45rem;
+}
+
+.mac-menu-bar__clock {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.mac-menu-bar__control {
+  height: 1.55rem !important;
+  min-height: 1.55rem !important;
+  border-color: color-mix(in srgb, var(--line-soft) 54%, transparent) !important;
+  background: color-mix(in srgb, var(--surface) 64%, transparent) !important;
+  border-radius: 0.42rem !important;
+}
+
+.mac-menu-bar__control-inner {
+  padding: 0.18rem 0.48rem !important;
+  color: var(--text) !important;
+  font-family: var(--font-mono);
+  font-size: 0.66rem !important;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.mac-menu-bar__theme-toggle {
+  width: 1.65rem !important;
+  height: 1.65rem !important;
+  min-width: 1.65rem;
+  padding: 0 !important;
+  color: var(--text) !important;
+  border: 1px solid color-mix(in srgb, var(--line-soft) 46%, transparent) !important;
+  border-radius: 0.42rem !important;
+  background: color-mix(in srgb, var(--surface) 58%, transparent) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.mac-menu-bar__theme-toggle svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+@media (max-width: 900px) {
+  .mac-menu-bar {
+    grid-template-columns: 1fr auto;
+    gap: 0.45rem 0.7rem;
+  }
+
+  .mac-menu-bar__menus {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.45rem;
+    overflow: hidden;
+  }
+
+  .mac-menu-bar__nav {
+    justify-self: stretch;
+    justify-content: flex-start;
+    gap: 0.35rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .mac-menu-bar__nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mac-menu-bar__right {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}
+
+@media (max-width: 560px) {
+  .mac-menu-bar__name {
+    font-size: 0.88rem;
+  }
+
+  .mac-menu-bar__clock {
+    display: none;
+  }
 }
 
 .topbar__brand {
@@ -751,6 +1011,19 @@ button {
   isolation: isolate;
 }
 
+.nav-tabs__item--glass {
+  border-radius: 0.5rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent),
+    color-mix(in srgb, var(--surface) 68%, transparent);
+  border: 1px solid color-mix(in srgb, var(--line-soft) 46%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 0.6rem 1.5rem color-mix(in srgb, var(--shadow) 64%, transparent);
+  backdrop-filter: blur(14px) saturate(1.16);
+  -webkit-backdrop-filter: blur(14px) saturate(1.16);
+}
+
 .nav-tabs__item--active,
 .nav-tabs__item:hover,
 .nav-tabs__item:focus-visible {
@@ -784,6 +1057,12 @@ button {
 
 .nav-tabs__outline--active {
   background: color-mix(in srgb, var(--text) 4%, transparent);
+}
+
+.nav-tabs__item--glass .nav-tabs__outline {
+  border-color: color-mix(in srgb, var(--line) 58%, transparent);
+  background: color-mix(in srgb, var(--hero-glow) 52%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 .divider {
@@ -911,7 +1190,7 @@ button {
   background-size: cover;
   opacity: 0.42;
   filter: grayscale(1) contrast(1.05);
-  transform: scale(0.92);
+  transform: scale(1);
   pointer-events: none;
 }
 
@@ -920,8 +1199,12 @@ button {
   position: absolute;
   inset: 0;
   background:
+    radial-gradient(circle at 50% 42%, var(--hero-glow) 0%, transparent 34%),
+    radial-gradient(circle at 22% 18%, var(--hero-glow-soft) 0%, transparent 28%),
+    radial-gradient(circle at 78% 72%, var(--hero-glow-soft) 0%, transparent 32%),
     linear-gradient(90deg, rgba(var(--bg-rgb), 0.96) 0%, rgba(var(--bg-rgb), 0.34) 24%, rgba(var(--bg-rgb), 0.18) 50%, rgba(var(--bg-rgb), 0.34) 76%, rgba(var(--bg-rgb), 0.96) 100%),
     linear-gradient(180deg, transparent 0 16%, rgba(17, 17, 17, 0.02) 16% 84%, transparent 84% 100%);
+  mix-blend-mode: normal;
   pointer-events: none;
 }
 
@@ -2287,9 +2570,16 @@ button {
   margin: 0;
   padding: 0.4rem;
   list-style: none;
-  border: 1px solid var(--line);
-  background: var(--surface-solid);
-  box-shadow: 0 0.85rem 2rem var(--shadow);
+  border: 1px solid color-mix(in srgb, var(--line-soft) 64%, transparent);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent),
+    color-mix(in srgb, var(--surface-solid) 82%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 0.85rem 2rem var(--shadow);
+  backdrop-filter: blur(16px) saturate(1.12);
+  -webkit-backdrop-filter: blur(16px) saturate(1.12);
   z-index: 30;
   display: grid;
   gap: 0.18rem;
@@ -3306,4 +3596,16 @@ button {
   --matrix-glow: color-mix(in srgb, var(--hero-title) 54%, transparent);
   --wave-bg: var(--bg);
   --wave-stroke: color-mix(in srgb, var(--text) 34%, transparent);
+}
+
+@keyframes menuFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
