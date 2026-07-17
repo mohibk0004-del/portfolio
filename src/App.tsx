@@ -125,33 +125,6 @@ const skillSets = [
     items: ['Unity', 'Unreal Engine', 'Blender', 'Photoshop', 'Illustrator', 'Figma', 'Framer', 'OpenCV'],
   },
 ];
-const marqueeSkills = [
-  'C',
-  'C++',
-  'C#',
-  'Python',
-  'JavaScript',
-  'React',
-  'Next.js',
-  'Node.js',
-  'Express',
-  'Flutter',
-  'Django',
-  '.NET',
-  'MySQL',
-  'PostgreSQL',
-  'MongoDB',
-  'Redis',
-  'AWS',
-  'Azure',
-  'Unity',
-  'Unreal',
-  'Blender',
-  'OpenCV',
-  'Figma',
-  'Framer',
-];
-
 const stackIconColor = (item: string) => {
   const key = item.toLowerCase();
   switch (key) {
@@ -794,25 +767,6 @@ function App() {
               </div>
               <p className="terminal-box__message">{terminalMessage}</p>
             </form>
-
-            <div className="skills-marquee" aria-label="Live stack marquee">
-              <div className="skills-marquee__fade skills-marquee__fade--left" aria-hidden="true" />
-              <div className="skills-marquee__fade skills-marquee__fade--right" aria-hidden="true" />
-              <div className="skills-marquee__track skills-marquee__track--rtl" aria-hidden="true">
-                {[...marqueeSkills, ...marqueeSkills].map((skill, idx) => (
-                  <span key={`rtl-${skill}-${idx}`} className="skills-marquee__item">
-                    {skill}
-                  </span>
-                ))}
-              </div>
-              <div className="skills-marquee__track skills-marquee__track--ltr" aria-hidden="true">
-                {[...marqueeSkills, ...marqueeSkills].map((skill, idx) => (
-                  <span key={`ltr-${skill}-${idx}`} className="skills-marquee__item">
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
           </motion.div>
         </section>
 
