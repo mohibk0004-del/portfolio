@@ -73,27 +73,12 @@ const WEBSITE_VERSION = __APP_BUILD_INFO__;
 
 type ChangelogEntry = {
   version: string;
+  date: string;
   title: string;
   summary: string;
 };
 
-const CHANGELOG_ENTRIES: ChangelogEntry[] = [
-  {
-    version: WEBSITE_VERSION,
-    title: 'feat: add version changelog hero controls',
-    summary: 'Current build marker and the hero changelog dropdown landed together.',
-  },
-  {
-    version: '64deb92',
-    title: 'improve mobile responsive layout',
-    summary: 'Refined the menu bar, hero copy, and terminal layout for tablet and mobile breakpoints.',
-  },
-  {
-    version: 'a22134a',
-    title: 'remove hero skills marquee',
-    summary: 'Removed the most distracting layer from the hero so the headline has room to breathe.',
-  },
-];
+const CHANGELOG_ENTRIES: ChangelogEntry[] = JSON.parse(__APP_CHANGELOG__);
 
 type ThemeKey =
   | 'light'
@@ -816,6 +801,7 @@ function App() {
                           <span className="hero__changelog-version">{entry.version}</span>
                           <span className="hero__changelog-headline">{entry.title}</span>
                         </div>
+                        <span className="hero__changelog-date">{entry.date}</span>
                         <p className="hero__changelog-summary">{entry.summary}</p>
                       </li>
                     ))}

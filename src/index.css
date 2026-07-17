@@ -1372,6 +1372,16 @@ button {
   font-weight: 700;
 }
 
+.hero__changelog-date {
+  display: block;
+  margin-top: 0.14rem;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
 .hero__changelog-summary {
   margin: 0.24rem 0 0;
   color: var(--muted);
