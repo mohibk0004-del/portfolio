@@ -1,7 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState, useRef, useMemo, useCallback, lazy, Suspense, type FormEvent } from 'react';
 import Lenis from 'lenis';
-import gsap from 'gsap';
 import { BootSequence } from './components/BootSequence';
 import { SlideButton } from './components/ui/slide-button';
 import { ShowcaseHover } from './components/ui/showcase-hover';
@@ -68,9 +67,9 @@ import { HoverBorderGradient } from './components/ui/hover-border-gradient';
 import { AnimatedThemeToggle } from './components/ui/animated-theme-toggle';
 import { ValentineSnakeGame } from './components/ValentineSnakeGame';
 
-const BACKGROUND_SURFACE: 'waves' | 'dotted' = 'waves';
+const BACKGROUND_SURFACE: 'waves' | 'dotted' = 'dotted';
 const HERO_PHRASES = ['MOHIB KHAN', 'CS STUDENT', 'AI + WEB DEV', 'GAME DEVELOPER'];
-const WEBSITE_VERSION = `v${__APP_VERSION__}`;
+const WEBSITE_VERSION = __APP_BUILD_INFO__;
 
 type ChangelogEntry = {
   version: string;
@@ -81,18 +80,18 @@ type ChangelogEntry = {
 const CHANGELOG_ENTRIES: ChangelogEntry[] = [
   {
     version: WEBSITE_VERSION,
-    title: 'Version marker + changelog control',
-    summary: 'Added a live version badge and a dropdown for recent release notes in the hero header.',
+    title: 'feat: add version changelog hero controls',
+    summary: 'Current build marker and the hero changelog dropdown landed together.',
   },
   {
-    version: 'v0.0.0',
-    title: 'Responsive navigation and hero variants',
-    summary: 'Adjusted the menu bar, hero copy, and terminal layout for tablet and mobile breakpoints.',
+    version: '64deb92',
+    title: 'improve mobile responsive layout',
+    summary: 'Refined the menu bar, hero copy, and terminal layout for tablet and mobile breakpoints.',
   },
   {
-    version: 'v0.0.0-1',
-    title: 'Portfolio section refinement',
-    summary: 'Kept the project ledger, footer, and scroll sections aligned with the existing brutalist language.',
+    version: 'a22134a',
+    title: 'remove hero skills marquee',
+    summary: 'Removed the most distracting layer from the hero so the headline has room to breathe.',
   },
 ];
 
@@ -337,6 +336,7 @@ function App() {
   const [terminalMessage, setTerminalMessage] = useState('TYPE ACCESS PORTFOLIO AND PRESS ENTER.');
   const terminalInputRef = useRef<HTMLInputElement>(null);
   const changelogRef = useRef<HTMLDivElement>(null);
+  const lenisRef = useRef<Lenis | null>(null);
 
   const hackThemeActive = theme === 'hack';
   const amnaThemeActive = theme === 'amna';
@@ -382,6 +382,7 @@ function App() {
       wheelMultiplier: 1,
       touchMultiplier: 1.6,
     });
+    lenisRef.current = lenis;
     let rafId = 0;
     const raf = (time: number) => {
       lenis.raf(time);
@@ -391,6 +392,7 @@ function App() {
     return () => {
       cancelAnimationFrame(rafId);
       lenis.destroy();
+      lenisRef.current = null;
       document.body.style.overflow = previousOverflow;
     };
   }, [booting]);
@@ -526,23 +528,24 @@ function App() {
   const smoothScrollTo = useCallback((targetId: string, delay = 0) => {
     const runScroll = () => {
       const target = document.getElementById(targetId);
-      if (!target) return;
+      if (!target) {
+        window.setTimeout(runScroll, 50);
+        return;
+      }
 
       const offset = 76;
       const targetY = Math.max(0, target.getBoundingClientRect().top + window.scrollY - offset);
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      if (reduceMotion) {
-        window.scrollTo({ top: targetY });
+      if (reduceMotion || !lenisRef.current) {
+        window.scrollTo({ top: targetY, behavior: reduceMotion ? 'auto' : 'smooth' });
         return;
       }
 
-      const scrollState = { y: window.scrollY };
-      gsap.to(scrollState, {
-        y: targetY,
-        duration: 1.35,
-        ease: 'power2.inOut',
-        onUpdate: () => window.scrollTo(0, scrollState.y),
+      lenisRef.current.scrollTo(targetY, {
+        duration: 1.15,
+        easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        lock: true,
       });
     };
 
@@ -563,7 +566,7 @@ function App() {
     if (normalized === 'ACCESS PORTFOLIO') {
       setTerminalUnlocked(true);
       setTerminalMessage('ACCESS GRANTED. TRY TYPING RENDER OR BITMAP.');
-      smoothScrollTo('workflow');
+      window.requestAnimationFrame(() => smoothScrollTo('workflow'));
       terminalInputRef.current?.focus();
       return;
     }
@@ -572,7 +575,7 @@ function App() {
       setTerminalUnlocked(true);
       setRenderPipelineVisible(true);
       setTerminalMessage('RENDER PIPELINE ACTIVE. SCROLL TO THE PIPELINE LANE.');
-      smoothScrollTo('pipeline', 100);
+      window.setTimeout(() => smoothScrollTo('pipeline'), 120);
       return;
     }
 
@@ -746,7 +749,7 @@ function App() {
         className="topbar"
         initial={{ opacity: 0, y: -18 }}
         animate={booting ? { opacity: 0, y: -18 } : { opacity: 1, y: 0 }}
-        transition={{ duration: 0.52, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ type: 'spring', stiffness: 240, damping: 28, mass: 0.9 }}
       >
         <MacOSMenuBar
           name="MOHIB KHAN"
@@ -779,12 +782,6 @@ function App() {
 
       <main className="portfolio-main">
         <section className={`hero${hackThemeActive ? ' hero--hack' : ''}${amnaThemeActive ? ' hero--amna' : ''}`} id="hero" style={{ ['--hero-image' as string]: `url(${heroImage})` }}>
-          {theme === 'matcha' && (
-            <>
-              <div className="hero__jp-left" aria-hidden="true">モヒブ・カーン</div>
-              <div className="hero__jp-right" aria-hidden="true">マッチャ</div>
-            </>
-          )}
           <span className="hero__version" aria-label={`Website version ${WEBSITE_VERSION}`}>{WEBSITE_VERSION}</span>
           <div className="hero__changelog" ref={changelogRef}>
             <button
@@ -804,10 +801,12 @@ function App() {
                   id="hero-changelog-menu"
                   className="hero__changelog-menu"
                   role="menu"
+                  data-lenis-prevent-wheel="true"
+                  data-lenis-prevent-touch="true"
                   initial={{ opacity: 0, y: -8, scale: 0.98 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -6, scale: 0.98 }}
-                  transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
+                  transition={{ type: 'spring', stiffness: 420, damping: 34, mass: 0.8 }}
                 >
                   <p className="hero__changelog-title">Recent changes</p>
                   <ul className="hero__changelog-list">
@@ -829,7 +828,15 @@ function App() {
           <motion.div className={`hero__copy${hackThemeActive ? ' hack-draggable' : ''}`} {...hackDrag}>
             <GooeyText texts={HERO_PHRASES} className="w-full py-8 px-4" textClassName="font-serif text-5xl sm:text-6xl md:text-7xl font-bold leading-[0.9]" />
 
-            <form className="terminal-box" onSubmit={handleTerminalSubmit}>
+            <motion.form
+              className="terminal-box"
+              onSubmit={handleTerminalSubmit}
+              initial={{ opacity: 0, y: 14, scale: 0.985 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ type: 'spring', stiffness: 240, damping: 26, mass: 0.9, delay: 0.12 }}
+              whileHover={{ y: -2 }}
+            >
+              <span className="terminal-box__scan" aria-hidden="true" />
               <div className="terminal-box__bar">
                 <span className="terminal-box__window-controls" aria-hidden="true">
                   <i />
@@ -854,7 +861,7 @@ function App() {
                 <button type="submit" className="terminal-box__submit">RUN</button>
               </div>
               <p className="terminal-box__message">{terminalMessage}</p>
-            </form>
+            </motion.form>
           </motion.div>
         </section>
 
@@ -1054,12 +1061,12 @@ function App() {
                     <TextScramble as="span" className="hover-footer__brand-name">MOHIB KHAN</TextScramble>
                   </div>
                   <p className="hover-footer__tagline">
-                    CS student building things in AI, cybersecurity, and game dev. Available for collaboration.
+                    CS student building things in AI, cybersecurity, and game dev. Collaboration, prototyping, and shipping.
                   </p>
                 </div>
 
                 <div className="hover-footer__col">
-                  <TextScramble as="h4">Navigate</TextScramble>
+                  <TextScramble as="h4">Routes</TextScramble>
                   <ul>
                     <li><a href="#hero">Top</a></li>
                     <li><a href="#about">About</a></li>
@@ -1069,7 +1076,7 @@ function App() {
                 </div>
 
                 <div className="hover-footer__col">
-                  <TextScramble as="h4">Connect</TextScramble>
+                  <TextScramble as="h4">Signals</TextScramble>
                   <ul>
                     <li>
                       <a href="https://github.com/mohibk0004-del" target="_blank" rel="noreferrer">GitHub</a>
@@ -1085,7 +1092,7 @@ function App() {
                 </div>
 
                 <div className="hover-footer__col">
-                  <TextScramble as="h4">Contact</TextScramble>
+                  <TextScramble as="h4">Direct</TextScramble>
                   <ul className="hover-footer__contact">
                     <li>
                       <Mail size={16} className="hover-footer__icon" />
