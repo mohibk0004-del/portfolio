@@ -500,8 +500,8 @@ function App() {
     setThemeMenuOpen(false);
   }, []);
 
-  const smoothScrollTo = useCallback((targetId: string, delay = 80) => {
-    window.setTimeout(() => {
+  const smoothScrollTo = useCallback((targetId: string, delay = 0) => {
+    const runScroll = () => {
       const target = document.getElementById(targetId);
       if (!target) return;
 
@@ -521,7 +521,14 @@ function App() {
         ease: 'power2.inOut',
         onUpdate: () => window.scrollTo(0, scrollState.y),
       });
-    }, delay);
+    };
+
+    if (delay > 0) {
+      window.setTimeout(() => window.requestAnimationFrame(runScroll), delay);
+      return;
+    }
+
+    window.requestAnimationFrame(runScroll);
   }, []);
 
   const handleTerminalSubmit = (event: FormEvent<HTMLFormElement>) => {
