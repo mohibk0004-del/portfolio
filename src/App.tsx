@@ -78,7 +78,7 @@ type ChangelogEntry = {
   summary: string;
 };
 
-const CHANGELOG_ENTRIES: ChangelogEntry[] = JSON.parse(__APP_CHANGELOG__);
+const CHANGELOG_ENTRIES: ChangelogEntry[] = __APP_CHANGELOG__;
 
 type ThemeKey =
   | 'light'
