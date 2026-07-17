@@ -70,6 +70,31 @@ import { ValentineSnakeGame } from './components/ValentineSnakeGame';
 
 const BACKGROUND_SURFACE: 'waves' | 'dotted' = 'waves';
 const HERO_PHRASES = ['MOHIB KHAN', 'CS STUDENT', 'AI + WEB DEV', 'GAME DEVELOPER'];
+const WEBSITE_VERSION = `v${__APP_VERSION__}`;
+
+type ChangelogEntry = {
+  version: string;
+  title: string;
+  summary: string;
+};
+
+const CHANGELOG_ENTRIES: ChangelogEntry[] = [
+  {
+    version: WEBSITE_VERSION,
+    title: 'Version marker + changelog control',
+    summary: 'Added a live version badge and a dropdown for recent release notes in the hero header.',
+  },
+  {
+    version: 'v0.0.0',
+    title: 'Responsive navigation and hero variants',
+    summary: 'Adjusted the menu bar, hero copy, and terminal layout for tablet and mobile breakpoints.',
+  },
+  {
+    version: 'v0.0.0-1',
+    title: 'Portfolio section refinement',
+    summary: 'Kept the project ledger, footer, and scroll sections aligned with the existing brutalist language.',
+  },
+];
 
 type ThemeKey =
   | 'light'
@@ -297,6 +322,7 @@ function App() {
   const [booting, setBooting] = useState(true);
   const [theme, setTheme] = useState<ThemeKey>('light');
   const [themeMenuOpen, setThemeMenuOpen] = useState(false);
+  const [changelogOpen, setChangelogOpen] = useState(false);
   const [bitmapMode, setBitmapMode] = useState(false);
   const [glitching, setGlitching] = useState(false);
   const [glitchVariant, setGlitchVariant] = useState(0);
@@ -310,6 +336,7 @@ function App() {
   const [terminalCommand, setTerminalCommand] = useState('ACCESS PORTFOLIO');
   const [terminalMessage, setTerminalMessage] = useState('TYPE ACCESS PORTFOLIO AND PRESS ENTER.');
   const terminalInputRef = useRef<HTMLInputElement>(null);
+  const changelogRef = useRef<HTMLDivElement>(null);
 
   const hackThemeActive = theme === 'hack';
   const amnaThemeActive = theme === 'amna';
@@ -413,6 +440,29 @@ function App() {
   useEffect(() => {
     document.documentElement.dataset.bitmap = bitmapMode ? '1' : '0';
   }, [bitmapMode]);
+
+  useEffect(() => {
+    if (!changelogOpen) return;
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!changelogRef.current?.contains(event.target as Node)) {
+        setChangelogOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setChangelogOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [changelogOpen]);
 
 
   useEffect(() => {
@@ -735,8 +785,46 @@ function App() {
               <div className="hero__jp-right" aria-hidden="true">マッチャ</div>
             </>
           )}
-          <span className="hero__coord hero__coord--left">[X:0001.Y:0001]</span>
-          <span className="hero__coord hero__coord--right">[X:0001.Y:0001]</span>
+          <span className="hero__version" aria-label={`Website version ${WEBSITE_VERSION}`}>{WEBSITE_VERSION}</span>
+          <div className="hero__changelog" ref={changelogRef}>
+            <button
+              type="button"
+              className="hero__changelog-toggle"
+              onClick={() => setChangelogOpen((value) => !value)}
+              aria-expanded={changelogOpen}
+              aria-haspopup="menu"
+              aria-controls="hero-changelog-menu"
+            >
+              changelog
+            </button>
+
+            <AnimatePresence>
+              {changelogOpen && (
+                <motion.div
+                  id="hero-changelog-menu"
+                  className="hero__changelog-menu"
+                  role="menu"
+                  initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                  transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
+                >
+                  <p className="hero__changelog-title">Recent changes</p>
+                  <ul className="hero__changelog-list">
+                    {CHANGELOG_ENTRIES.map((entry) => (
+                      <li key={`${entry.version}-${entry.title}`} className="hero__changelog-item">
+                        <div className="hero__changelog-item-top">
+                          <span className="hero__changelog-version">{entry.version}</span>
+                          <span className="hero__changelog-headline">{entry.title}</span>
+                        </div>
+                        <p className="hero__changelog-summary">{entry.summary}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           <motion.div className={`hero__copy${hackThemeActive ? ' hack-draggable' : ''}`} {...hackDrag}>
             <GooeyText texts={HERO_PHRASES} className="w-full py-8 px-4" textClassName="font-serif text-5xl sm:text-6xl md:text-7xl font-bold leading-[0.9]" />
