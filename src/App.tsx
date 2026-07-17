@@ -235,9 +235,8 @@ const projectLedger: ProjectLedger[] = [
   {
     title: 'Sideline',
     note: 'A second-screen match companion with live sentiment, prediction loops, and branded match moments.',
-    year: 'IN DEVELOPMENT',
+    year: 'LIVE',
     repo: 'https://github.com/amna0x/sideline',
-    inDev: true,
   },
   {
     title: 'Spotify Album Finder',
@@ -359,12 +358,23 @@ function App() {
   );
 
   useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+
     if (booting) {
       document.body.style.overflow = 'hidden';
-      return;
+      return () => {
+        document.body.style.overflow = previousOverflow;
+      };
     }
+
+    document.body.style.overflow = previousOverflow;
+
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) return;
+    if (reduce) {
+      return () => {
+        document.body.style.overflow = previousOverflow;
+      };
+    }
     const lenis = new Lenis({
       duration: 0.95,
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -381,6 +391,7 @@ function App() {
     return () => {
       cancelAnimationFrame(rafId);
       lenis.destroy();
+      document.body.style.overflow = previousOverflow;
     };
   }, [booting]);
 
