@@ -59,7 +59,6 @@ const DottedSurface = lazy(() =>
 );
 
 import { GooeyText } from './components/ui/gooey-text-morphing';
-import { HoverBorderGradient } from './components/ui/hover-border-gradient';
 import { AnimatedThemeToggle } from './components/ui/animated-theme-toggle';
 import { ValentineSnakeGame } from './components/ValentineSnakeGame';
 import { LiquidButton } from './components/ui/liquid-glass-button';
