@@ -217,7 +217,7 @@ const projectLedger: ProjectLedger[] = [
   {
     title: 'Sideline',
     note: 'A second-screen match companion with live sentiment, prediction loops, and branded match moments.',
-    year: 'LIVE',
+    year: 'COMPLETED',
     repo: 'https://github.com/amna0x/sideline',
   },
   {
@@ -551,7 +551,7 @@ function App() {
     if (normalized === 'ACCESS PORTFOLIO') {
       setTerminalUnlocked(true);
       setTerminalMessage('ACCESS GRANTED. TRY TYPING RENDER OR BITMAP.');
-      window.requestAnimationFrame(() => smoothScrollTo('workflow'));
+      window.setTimeout(() => smoothScrollTo('workflow'), 1000);
       terminalInputRef.current?.focus();
       return;
     }
@@ -874,7 +874,7 @@ function App() {
 
                     <section className="scroll-section scroll-section--about" id="about">
                       <article className="status-report">
-                        <TextScramble as="span" className="status-report__title">about me</TextScramble>
+                        <TextScramble as="span" className="status-report__title">[ USER_PROFILE ]</TextScramble>
                         <p className="status-report__longform">
                           I&apos;m a Computer Science student with a strong passion for Artificial Intelligence,
                           Cybersecurity, and Game Development. When I&apos;m not writing code or building 3D environments,
@@ -925,9 +925,6 @@ function App() {
                           if (e.key === 'Enter' || e.key === ' ') setSelectedActive((v) => !v);
                         }}
                       >
-                        <div className="selected-output__title">
-                          <TextScramble as="em">Selected_Projects</TextScramble>
-                        </div>
                         <TextScramble as="div" className="selected-output__drive">DRIVE:/PROJECTS/*</TextScramble>
                       </div>
 
@@ -944,7 +941,7 @@ function App() {
                             onMouseEnter={() => bumpProjectTitleScramble(project.title)}
                             onFocusCapture={() => bumpProjectTitleScramble(project.title)}
                           >
-                            <div className="ledger-row__index">[/&gt; {String(index + 1).padStart(2, '0')}]</div>
+                            <div className="ledger-row__index">[/&gt;]</div>
                             <div className="ledger-row__content">
                               <TextScramble
                                 as="h4"
@@ -984,13 +981,13 @@ function App() {
                       </section>
 
                       <div className="project-showcase-lane">
-                        {featuredShowcases.map((item, index) => (
+                        {featuredShowcases.map((item) => (
                           <article className="project-showcase-card" key={item.title}>
                             <div className="project-showcase-card__header">
                               <TextScramble as="h4" duration={1.1} speed={0.03} trigger>
                                 {item.title}
                               </TextScramble>
-                              <span className="project-showcase-card__index">0{index + 1}</span>
+                              <span className="project-showcase-card__index">[//]</span>
                             </div>
                             <p className="project-showcase-card__copy">{item.note}</p>
                             <div className="project-showcase-card__actions">
