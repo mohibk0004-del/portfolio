@@ -62,7 +62,7 @@ export function ProjectCard({
   return (
     <motion.div
       ref={cardRef}
-      className={`absolute w-[90%] md:w-[60%] border ${containerBorder}`}
+      className={`interactive-card absolute w-[90%] md:w-[60%] border ${containerBorder}`}
       style={{
         top: topPosition,
         left: leftPosition,

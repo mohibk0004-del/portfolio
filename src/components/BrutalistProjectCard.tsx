@@ -51,7 +51,7 @@ export function BrutalistProjectCard({
     <article
       ref={cardRef}
       onMouseEnter={handleMouseEnter}
-      className="border border-zinc-700 bg-[#101216] group hover:border-zinc-400 hover:translate-x-0.5 hover:-translate-y-0.5 transition-all duration-200 active:translate-x-0 active:translate-y-0 relative"
+      className="interactive-card border border-zinc-700 bg-[#101216] group hover:border-zinc-400 hover:translate-x-0.5 hover:-translate-y-0.5 relative"
     >
       <div className="border-b border-zinc-700 px-4 py-2 flex items-center justify-between bg-[#101216]">
         <div className="flex items-center gap-3">

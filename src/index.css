@@ -24,7 +24,29 @@
   --matrix-glow: color-mix(in srgb, var(--hero-title) 54%, transparent);
   --wave-bg: var(--bg);
   --wave-stroke: color-mix(in srgb, var(--text) 34%, transparent);
+  
+  /* Apple Design / Emil Kowalski Animation Variables */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  
   color-scheme: light;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  button, 
+  a, 
+  .interactive-card, 
+  [role="button"] {
+    transition: transform 160ms var(--ease-out), filter 200ms var(--ease-out), background-color 200ms var(--ease-out), color 200ms var(--ease-out), border-color 200ms var(--ease-out);
+  }
+  
+  button:active, 
+  a:active, 
+  .interactive-card:active, 
+  [role="button"]:active {
+    transform: scale(0.97);
+  }
 }
 
 :root[data-theme='dark'] {

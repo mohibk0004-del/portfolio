@@ -66,6 +66,12 @@ import { AnimatedThemeToggle } from './components/ui/animated-theme-toggle';
 import { ValentineSnakeGame } from './components/ValentineSnakeGame';
 import { LiquidButton } from './components/ui/liquid-glass-button';
 
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
+
 const HERO_PHRASES = ['MOHIB KHAN', 'CS STUDENT', 'AI + WEB DEV', 'GAME DEVELOPER'];
 const WEBSITE_VERSION = __APP_BUILD_INFO__;
 
@@ -319,28 +325,12 @@ const ALL_THEME_KEYS = new Set<ThemeKey>([
 
 const workflowContainerVariants = {
   hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.18,
-      delayChildren: 0.2
-    }
-  },
+  visible: { opacity: 1 },
   exit: { opacity: 0, y: 12, transition: { duration: 0.3 } }
 };
 
-import type { Variants } from 'framer-motion';
-
-const workflowItemVariants: Variants = {
-  hidden: { opacity: 0, y: 12 },
-  visible: { 
-    opacity: 1, 
-    y: 0,
-    transition: { type: 'spring', stiffness: 100, damping: 20 }
-  }
-};
-
 function App() {
+  const appRef = useRef<HTMLDivElement>(null);
   const [started, setStarted] = useState(false);
   const [booting, setBooting] = useState(true);
   const [theme, setTheme] = useState<ThemeKey>('light');
@@ -361,6 +351,26 @@ function App() {
   const terminalInputRef = useRef<HTMLInputElement>(null);
   const changelogRef = useRef<HTMLDivElement>(null);
   const lenisRef = useRef<Lenis | null>(null);
+
+  useGSAP(() => {
+    if (!terminalUnlocked) return;
+    
+    // Apple-style cascade and spring reveal for scroll sections
+    gsap.utils.toArray('.scroll-section').forEach((section: any) => {
+      gsap.from(section, {
+        scrollTrigger: {
+          trigger: section,
+          start: 'top 85%',
+          toggleActions: 'play none none reverse',
+        },
+        y: 40,
+        opacity: 0,
+        filter: 'blur(10px)',
+        duration: 0.8,
+        ease: 'power3.out',
+      });
+    });
+  }, { dependencies: [terminalUnlocked], scope: appRef });
 
   const hackThemeActive = theme === 'hack';
   const amnaThemeActive = theme === 'amna';
@@ -711,7 +721,7 @@ function App() {
   }, []);
 
   return (
-    <div className={`page-shell${glitching ? ` glitching glitch-v${glitchVariant}` : ''}${bitmapMode ? ' bitmap-mode' : ''}`}>
+    <div ref={appRef} className={`page-shell${glitching ? ` glitching glitch-v${glitchVariant}` : ''}${bitmapMode ? ' bitmap-mode' : ''}`}>
       <AnimatePresence>
         {!started && (
           <motion.div 
@@ -936,7 +946,7 @@ function App() {
                   <div className="scroll-journey-shell__left">
                     <h2 className="workflow-column-title">STACKS</h2>
 
-                    <motion.section data-od-id="section-about" variants={workflowItemVariants} className="scroll-section scroll-section--about" id="about">
+                    <motion.section data-od-id="section-about" className="scroll-section scroll-section--about" id="about">
                       <LiquidGlassBackdrop />
                       <article className="status-report">
                         <TextScramble as="span" className="status-report__title">[ USER_PROFILE ]</TextScramble>
@@ -948,7 +958,7 @@ function App() {
                       </article>
                     </motion.section>
 
-                    <motion.section data-od-id="section-stack" variants={workflowItemVariants} className="scroll-section scroll-section--stack" id="stack">
+                    <motion.section data-od-id="section-stack" className="scroll-section scroll-section--stack" id="stack">
                       <LiquidGlassBackdrop />
                       <div className="scroll-section__header">
                         <TextScramble as="h2" className="section-label">// TOOL_MATRIX</TextScramble>
@@ -981,7 +991,7 @@ function App() {
                   <div className="scroll-journey-shell__right">
                     <h2 className="workflow-column-title workflow-column-title--projects">PROJECTS</h2>
 
-                    <motion.section data-od-id="section-projects" variants={workflowItemVariants} className="scroll-section scroll-section--projects" id="projects">
+                    <motion.section data-od-id="section-projects" className="scroll-section scroll-section--projects" id="projects">
                       <LiquidGlassBackdrop />
                       <div
                         className={`selected-output ${selectedActive ? 'selected-output--active' : ''}`}
