@@ -58,17 +58,12 @@ const DottedSurface = lazy(() =>
   import('./components/ui/dotted-surface').then((m) => ({ default: m.DottedSurface }))
 );
 
-const Waves = lazy(() =>
-  import('./components/ui/wave-background').then((m) => ({ default: m.Waves }))
-);
-
 import { GooeyText } from './components/ui/gooey-text-morphing';
 import { HoverBorderGradient } from './components/ui/hover-border-gradient';
 import { AnimatedThemeToggle } from './components/ui/animated-theme-toggle';
 import { ValentineSnakeGame } from './components/ValentineSnakeGame';
 import { LiquidButton } from './components/ui/liquid-glass-button';
 
-const BACKGROUND_SURFACE: 'waves' | 'dotted' = 'dotted';
 const HERO_PHRASES = ['MOHIB KHAN', 'CS STUDENT', 'AI + WEB DEV', 'GAME DEVELOPER'];
 const WEBSITE_VERSION = __APP_BUILD_INFO__;
 
@@ -350,9 +345,7 @@ function App() {
 
   const hackThemeActive = theme === 'hack';
   const amnaThemeActive = theme === 'amna';
-  const [backgroundSurfaceMode, setBackgroundSurfaceMode] = useState<'waves' | 'dotted'>(BACKGROUND_SURFACE);
-  const showDottedSurface = backgroundSurfaceMode === 'dotted' && !booting;
-  const showWaveSurface = backgroundSurfaceMode === 'waves' && !booting;
+  const showDottedSurface = !booting;
 
   const hackDrag = useMemo(
     () =>
@@ -709,27 +702,6 @@ function App() {
       <div className="page-noise" aria-hidden="true" />
 
       <AnimatePresence mode="wait">
-        {showWaveSurface && (
-          <motion.div
-            key="wave-surface"
-            className="background-surface"
-            aria-hidden="true"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <Suspense fallback={null}>
-              <Waves
-                className="page-waves"
-                strokeColor="var(--wave-stroke)"
-                backgroundColor="var(--wave-bg)"
-                pointerSize={0.3}
-              />
-            </Suspense>
-          </motion.div>
-        )}
-
         {showDottedSurface && (
           <motion.div
             key="dotted-surface"
@@ -796,14 +768,6 @@ function App() {
           onThemeSelect={(next) => pickTheme(next as ThemeKey)}
           activeId={activeNavId}
           rightSlot={
-            <>
-              <HoverBorderGradient
-                onClick={() => setBackgroundSurfaceMode(backgroundSurfaceMode === 'waves' ? 'dotted' : 'waves')}
-                containerClassName="mac-menu-bar__control mac-menu-bar__control--surface"
-                className="mac-menu-bar__control-inner"
-              >
-                {backgroundSurfaceMode === 'waves' ? 'DOT' : 'WAVE'}
-              </HoverBorderGradient>
               <AnimatedThemeToggle
                 isDark={theme === 'dark'}
                 onToggle={toggleLightDark}
@@ -820,7 +784,7 @@ function App() {
         animate={booting ? { filter: "blur(20px)", scale: 0.92, opacity: 0 } : { filter: "blur(0px)", scale: 1, opacity: 1 }}
         transition={{ type: "spring", stiffness: 180, damping: 24, mass: 0.8, delay: 0.1 }}
       >
-        <section className={`hero${hackThemeActive ? ' hero--hack' : ''}${amnaThemeActive ? ' hero--amna' : ''}`} id="hero" style={{ ['--hero-image' as string]: `url(${heroImage})` }}>
+        <section data-od-id="section-hero" className={`hero${hackThemeActive ? ' hero--hack' : ''}${amnaThemeActive ? ' hero--amna' : ''}`} id="hero" style={{ ['--hero-image' as string]: `url(${heroImage})` }}>
           <span className="hero__version" aria-label={`Website version ${WEBSITE_VERSION}`}>{WEBSITE_VERSION}</span>
           <div className="hero__changelog" ref={changelogRef}>
             <button
@@ -928,7 +892,7 @@ function App() {
                   <div className="scroll-journey-shell__left">
                     <h2 className="workflow-column-title">STACKS</h2>
 
-                    <motion.section variants={workflowItemVariants} className="scroll-section scroll-section--about" id="about">
+                    <motion.section data-od-id="section-about" variants={workflowItemVariants} className="scroll-section scroll-section--about" id="about">
                       <LiquidGlassBackdrop />
                       <article className="status-report">
                         <TextScramble as="span" className="status-report__title">[ USER_PROFILE ]</TextScramble>
@@ -940,7 +904,7 @@ function App() {
                       </article>
                     </motion.section>
 
-                    <motion.section variants={workflowItemVariants} className="scroll-section scroll-section--stack" id="stack">
+                    <motion.section data-od-id="section-stack" variants={workflowItemVariants} className="scroll-section scroll-section--stack" id="stack">
                       <LiquidGlassBackdrop />
                       <div className="scroll-section__header">
                         <TextScramble as="h2" className="section-label">// TOOL_MATRIX</TextScramble>
@@ -973,7 +937,7 @@ function App() {
                   <div className="scroll-journey-shell__right">
                     <h2 className="workflow-column-title workflow-column-title--projects">PROJECTS</h2>
 
-                    <motion.section variants={workflowItemVariants} className="scroll-section scroll-section--projects" id="projects">
+                    <motion.section data-od-id="section-projects" variants={workflowItemVariants} className="scroll-section scroll-section--projects" id="projects">
                       <LiquidGlassBackdrop />
                       <div
                         className={`selected-output ${selectedActive ? 'selected-output--active' : ''}`}
@@ -987,7 +951,7 @@ function App() {
                         <TextScramble as="div" className="selected-output__drive">DRIVE:/PROJECTS/*</TextScramble>
                       </div>
 
-                      <section className="project-ledger">
+                      <section data-od-id="project-ledger" className="project-ledger">
                         {projectLedger.map((project, index) => (
                           <motion.article
                             className="ledger-row"
@@ -1063,7 +1027,7 @@ function App() {
 
 
                 {renderPipelineVisible && (
-                  <section className="render-pipeline render-pipeline--active scroll-section scroll-section--pipeline" id="pipeline">
+                  <section data-od-id="section-pipeline" className="render-pipeline render-pipeline--active scroll-section scroll-section--pipeline" id="pipeline">
                     <LiquidGlassBackdrop />
                     <div className="render-pipeline__frame">
                       <div className="render-pipeline__header">
@@ -1087,6 +1051,7 @@ function App() {
       <AnimatePresence>
         {!amnaThemeActive && terminalUnlocked && (
           <motion.footer
+            data-od-id="section-contact"
             key="hover-footer"
             className={`hover-footer${hackThemeActive ? ' hack-draggable' : ''}`}
             id="contact"
