@@ -3,7 +3,7 @@ import { useEffect, useState, useRef, useMemo, useCallback, lazy, Suspense, type
 import Lenis from 'lenis';
 import { BootSequence } from './components/BootSequence';
 import { SlideButton } from './components/ui/slide-button';
-import { ShowcaseHover } from './components/ui/showcase-hover';
+import { HeroVideoDialog } from './components/ui/hero-video-dialog';
 import { TextHoverEffect, FooterBackgroundGradient } from './components/ui/hover-footer';
 import { TextScramble } from './components/ui/text-scramble';
 import type { NavigationItem } from './components/ui/animated-navigation-tabs';
@@ -129,11 +129,13 @@ type ProjectLedger = {
     type: 'video';
     src: string;
     title: string;
+    thumbnail?: string;
   }
   | {
     type: 'youtube';
     src: string;
     title: string;
+    thumbnail?: string;
   };
 };
 
@@ -258,6 +260,7 @@ const projectLedger: ProjectLedger[] = [
       type: 'video',
       src: platformerVideo,
       title: '3D platformer gameplay showcase',
+      thumbnail: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070&auto=format&fit=crop',
     },
   },
 ];
@@ -270,6 +273,7 @@ const featuredShowcases = [
       type: 'youtube' as const,
       src: 'https://www.youtube.com/watch?v=e6k2tYyHop4',
       title: 'Valorant Edit on AE showcase',
+      thumbnail: 'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?q=80&w=2070&auto=format&fit=crop',
     },
   },
   {
@@ -279,9 +283,26 @@ const featuredShowcases = [
       type: 'youtube' as const,
       src: 'https://www.youtube.com/watch?v=JVrj3tlU-m8',
       title: 'Lethal Company Edit w/ Subtitles showcase',
+      thumbnail: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=2071&auto=format&fit=crop',
     },
   },
 ];
+
+const toYoutubeEmbedUrl = (src: string) => {
+    try {
+        const parsed = new URL(src);
+        let videoId = '';
+        if (parsed.hostname.includes('youtu.be')) {
+            videoId = parsed.pathname.replace('/', '');
+        } else {
+            videoId = parsed.searchParams.get('v') ?? '';
+        }
+        if (!videoId) return src;
+        return `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoId}&playsinline=1&rel=0&modestbranding=1`;
+    } catch {
+        return src;
+    }
+};
 
 const heartStream = Array.from({ length: 22 }, (_, index) => ({
   id: index,
@@ -1045,11 +1066,14 @@ function App() {
                             <div className="ledger-row__meta">
                               <div className="ledger-row__year">{project.year}</div>
                               {project.showcase && (
-                                <ShowcaseHover
-                                  media={project.showcase}
-                                  className="ledger-row__showcase"
-                                  label="showcase"
-                                  align="left"
+                                <HeroVideoDialog
+                                  animationStyle="from-center"
+                                  videoSrc={project.showcase.type === 'youtube' ? toYoutubeEmbedUrl(project.showcase.src) : project.showcase.src}
+                                  trigger={
+                                    <button type="button" className="showcase-hover__trigger ledger-row__showcase" aria-label={`showcase for ${project.title}`}>
+                                      showcase
+                                    </button>
+                                  }
                                 />
                               )}
                             </div>
@@ -1067,8 +1091,16 @@ function App() {
                               <span className="project-showcase-card__index">[//]</span>
                             </div>
                             <p className="project-showcase-card__copy">{item.note}</p>
-                            <div className="project-showcase-card__actions">
-                              <ShowcaseHover media={item.media} className="project-showcase-card__trigger" label="showcase" align="right" />
+                            <div className="project-showcase-card__actions mt-4">
+                              <HeroVideoDialog
+                                animationStyle="from-center"
+                                videoSrc={item.media.type === 'youtube' ? toYoutubeEmbedUrl(item.media.src) : item.media.src}
+                                trigger={
+                                  <button type="button" className="project-showcase-card__trigger" aria-label={`showcase for ${item.title}`}>
+                                    showcase
+                                  </button>
+                                }
+                              />
                               <SlideButton href={item.media.src} ariaLabel={`Watch ${item.title}`} />
                             </div>
                           </article>
