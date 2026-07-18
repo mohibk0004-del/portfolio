@@ -94,9 +94,9 @@ type ThemeKey =
   | 'halftone';
 
 const SHADER_COLORS: Record<ThemeKey, [string, string, string, string]> = {
-  light: ["#f6f6f6", "#ffffff", "#f0f0f0", "#e8e8e8"],
+  light: ["#a1c4fd", "#c2e9fb", "#d4fc79", "#96e6a1"],
   dark: ["#050505", "#0a0a0a", "#111111", "#080808"],
-  ivory: ["#faf8f2", "#fdfbf7", "#f5f0e6", "#f0ead6"],
+  ivory: ["#ffecd2", "#fcb69f", "#ff9a9e", "#fecfef"],
   amoled: ["#000000", "#050506", "#0b0c0e", "#111214"],
   hack: ["#020602", "#001a09", "#002b0f", "#004016"],
   decolumb: ["#1f3a4d", "#163040", "#2c4e66", "#f5a53a"],
