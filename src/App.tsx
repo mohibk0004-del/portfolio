@@ -58,6 +58,8 @@ const DottedSurface = lazy(() =>
   import('./components/ui/dotted-surface').then((m) => ({ default: m.DottedSurface }))
 );
 
+const BackgroundShader = lazy(() => import('./components/ui/background-shader'));
+
 import { GooeyText } from './components/ui/gooey-text-morphing';
 import { AnimatedThemeToggle } from './components/ui/animated-theme-toggle';
 import { ValentineSnakeGame } from './components/ValentineSnakeGame';
@@ -90,6 +92,23 @@ type ThemeKey =
   | 'matcha'
   | 'amna'
   | 'halftone';
+
+const SHADER_COLORS: Record<ThemeKey, [string, string, string, string]> = {
+  light: ["#f6f6f6", "#ffffff", "#f0f0f0", "#e8e8e8"],
+  dark: ["#050505", "#0a0a0a", "#111111", "#080808"],
+  ivory: ["#faf8f2", "#fdfbf7", "#f5f0e6", "#f0ead6"],
+  amoled: ["#000000", "#050506", "#0b0c0e", "#111214"],
+  hack: ["#020602", "#001a09", "#002b0f", "#004016"],
+  decolumb: ["#1f3a4d", "#163040", "#2c4e66", "#f5a53a"],
+  gunmetal: ["#181a1b", "#1e2124", "#2a2e33", "#141617"],
+  dubai: ["#141412", "#cfb53b", "#2e2b20", "#1f1d16"],
+  luxury: ["#1c1c1c", "#d4af37", "#2d2d2d", "#242424"],
+  power: ["#0f0f0f", "#b19cd9", "#1c1428", "#140e1f"],
+  forest: ["#0f1712", "#98ff98", "#1a261e", "#141f18"],
+  matcha: ["#faf7f2", "#a4d6a4", "#eef0e6", "#f2f5ec"],
+  amna: ["#fff0f5", "#ff2d55", "#ffe4e1", "#ffb6c1"],
+  halftone: ["#ffffff", "#e0e0e0", "#f0f0f0", "#d0d0d0"],
+};
 
 
 type ProjectLedger = {
@@ -687,6 +706,9 @@ function App() {
             exit={{ opacity: 0, filter: "blur(10px)", scale: 1.05, transition: { duration: 0.5 } }}
             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
           >
+            <Suspense fallback={null}>
+              <BackgroundShader colors={SHADER_COLORS[theme]} />
+            </Suspense>
             <motion.div
               whileTap={{ scale: 0.95 }}
               transition={{ type: "spring", stiffness: 400, damping: 25 }}
