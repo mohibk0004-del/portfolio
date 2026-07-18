@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { BlurFade } from "./ui/blur-fade";
+import startupSound from "../assets/startup.mp3";
 
 const MOCK_LOGS = [
   "bios: Scanning memory...",
@@ -50,11 +51,25 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
   useEffect(() => {
     if (!showHello) return;
 
+    // Play iOS-like startup sound for exactly 2 seconds to avoid power off sfx
+    const audio = new Audio(startupSound);
+    audio.volume = 0.6;
+    audio.play().catch(e => console.log("Audio play failed:", e));
+
+    const stopTimer = setTimeout(() => {
+      audio.pause();
+      audio.currentTime = 0;
+    }, 2000);
+
     const timer = setTimeout(() => {
       onComplete();
     }, 1750);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(stopTimer);
+      audio.pause();
+    };
   }, [showHello, onComplete]);
 
   return (

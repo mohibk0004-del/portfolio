@@ -61,17 +61,17 @@ export const Skiper19 = ({ className, title = DEFAULT_TITLE, subtitle = DEFAULT_
             className={cn('portfolio-scroll relative w-full overflow-x-clip overflow-y-visible px-4 py-10 text-[color:var(--text)] sm:px-6', className)}
             style={{ color: 'var(--text)' }}
         >
-            <div className="mx-auto relative w-full max-w-[1600px]">
-                <aside className="pointer-events-none absolute -bottom-80 top-0 right-0 hidden w-[54%] lg:block">
+            <div className="mx-auto relative w-full max-w-[1600px] isolate z-0">
+                <aside className="pointer-events-none absolute -bottom-80 top-0 right-0 hidden w-[54%] lg:block z-[-100]">
                     <div className="h-full">
                         <LinePath
-                            className="h-full w-full text-[color:var(--text)] opacity-55"
+                            className="h-full w-full text-[color:var(--text)] opacity-30 mix-blend-overlay"
                             scrollYProgress={scrollYProgress}
                         />
                     </div>
                 </aside>
 
-                <div className="relative z-[1] flex min-w-0 flex-col gap-8">
+                <div className="relative z-10 flex min-w-0 flex-col gap-8">
                     <header className="scroll-journey__intro flex max-w-4xl flex-col items-center gap-3 px-1 text-center lg:items-start lg:px-0 lg:text-left">
                         <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[color:var(--muted)]">
                             ADMIN_WORKFLOW

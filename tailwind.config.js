@@ -65,13 +65,13 @@ export default {
         "full": "9999px"
       },
       fontFamily: {
-        "headline-md": ["VT323", "monospace"],
-        "headline-xl": ["VT323", "monospace"],
-        "label-mono": ["Space Mono", "monospace"],
-        "headline-lg": ["VT323", "monospace"],
-        "body-md": ["Space Mono", "monospace"],
-        "body-lg": ["Space Mono", "monospace"],
-        "mono": ["Space Mono", "monospace"]
+        "headline-md": ["-apple-system", "BlinkMacSystemFont", "SF Pro Display", "sans-serif"],
+        "headline-xl": ["-apple-system", "BlinkMacSystemFont", "SF Pro Display", "sans-serif"],
+        "label-mono": ["ui-monospace", "SF Mono", "Menlo", "Monaco", "monospace"],
+        "headline-lg": ["-apple-system", "BlinkMacSystemFont", "SF Pro Display", "sans-serif"],
+        "body-md": ["-apple-system", "BlinkMacSystemFont", "SF Pro Display", "sans-serif"],
+        "body-lg": ["-apple-system", "BlinkMacSystemFont", "SF Pro Display", "sans-serif"],
+        "mono": ["ui-monospace", "SF Mono", "Menlo", "Monaco", "monospace"]
       },
       fontSize: {
         "headline-md": ["32px", { lineHeight: "1.15", fontWeight: "600", letterSpacing: "-0.01em" }],

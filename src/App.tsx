@@ -66,6 +66,7 @@ import { GooeyText } from './components/ui/gooey-text-morphing';
 import { HoverBorderGradient } from './components/ui/hover-border-gradient';
 import { AnimatedThemeToggle } from './components/ui/animated-theme-toggle';
 import { ValentineSnakeGame } from './components/ValentineSnakeGame';
+import { LiquidButton } from './components/ui/liquid-glass-button';
 
 const BACKGROUND_SURFACE: 'waves' | 'dotted' = 'dotted';
 const HERO_PHRASES = ['MOHIB KHAN', 'CS STUDENT', 'AI + WEB DEV', 'GAME DEVELOPER'];
@@ -299,10 +300,34 @@ const ALL_THEME_KEYS = new Set<ThemeKey>([
   'forest',
   'matcha',
   'amna',
-  'halftone',
+  'halftone'
 ]);
 
+const workflowContainerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.18,
+      delayChildren: 0.2
+    }
+  },
+  exit: { opacity: 0, y: 12, transition: { duration: 0.3 } }
+};
+
+import type { Variants } from 'framer-motion';
+
+const workflowItemVariants: Variants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { type: 'spring', stiffness: 100, damping: 20 }
+  }
+};
+
 function App() {
+  const [started, setStarted] = useState(false);
   const [booting, setBooting] = useState(true);
   const [theme, setTheme] = useState<ThemeKey>('light');
   const [themeMenuOpen, setThemeMenuOpen] = useState(false);
@@ -312,12 +337,12 @@ function App() {
   const [glitchVariant, setGlitchVariant] = useState(0);
   const [heartsActive, setHeartsActive] = useState(false);
   const [heartsKey, setHeartsKey] = useState(0);
+  const [terminalCommand, setTerminalCommand] = useState('ACCESS PORTFOLIO');
   const [terminalUnlocked, setTerminalUnlocked] = useState(false);
   const [renderPipelineVisible, setRenderPipelineVisible] = useState(false);
   const [selectedActive, setSelectedActive] = useState(true);
   const [projectTitleScrambleTick, setProjectTitleScrambleTick] = useState<Record<string, number>>({});
   const [, setHeroPhraseIndex] = useState(0);
-  const [terminalCommand, setTerminalCommand] = useState('ACCESS PORTFOLIO');
   const [terminalMessage, setTerminalMessage] = useState('TYPE ACCESS PORTFOLIO AND PRESS ENTER.');
   const terminalInputRef = useRef<HTMLInputElement>(null);
   const changelogRef = useRef<HTMLDivElement>(null);
@@ -654,7 +679,31 @@ function App() {
   return (
     <div className={`page-shell${glitching ? ` glitching glitch-v${glitchVariant}` : ''}${bitmapMode ? ' bitmap-mode' : ''}`}>
       <AnimatePresence>
-        {booting && <BootSequence onComplete={() => setBooting(false)} />}
+        {!started && (
+          <motion.div 
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-[color:var(--bg)] text-[color:var(--text)] font-mono"
+            initial={{ opacity: 0, filter: "blur(10px)", scale: 1.02 }}
+            animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
+            exit={{ opacity: 0, filter: "blur(10px)", scale: 1.05, transition: { duration: 0.5 } }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <motion.div
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            >
+              <LiquidButton 
+                onClick={() => setStarted(true)}
+                className="tracking-[0.2em] font-bold"
+              >
+                Start
+              </LiquidButton>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {started && booting && <BootSequence onComplete={() => setBooting(false)} />}
       </AnimatePresence>
 
       <div className="page-noise" aria-hidden="true" />
@@ -732,9 +781,9 @@ function App() {
 
       <motion.header
         className="topbar"
-        initial={{ opacity: 0, y: -18 }}
-        animate={booting ? { opacity: 0, y: -18 } : { opacity: 1, y: 0 }}
-        transition={{ type: 'spring', stiffness: 240, damping: 28, mass: 0.9 }}
+        initial={{ opacity: 0, y: -18, filter: "blur(10px)" }}
+        animate={booting ? { opacity: 0, y: -18, filter: "blur(10px)" } : { opacity: 1, y: 0, filter: "blur(0px)" }}
+        transition={{ type: 'spring', stiffness: 240, damping: 28, mass: 0.9, delay: 0.15 }}
       >
         <MacOSMenuBar
           name="MOHIB KHAN"
@@ -765,7 +814,12 @@ function App() {
         />
       </motion.header>
 
-      <main className="portfolio-main">
+      <motion.main 
+        className="portfolio-main"
+        initial={{ filter: "blur(20px)", scale: 0.92, opacity: 0 }}
+        animate={booting ? { filter: "blur(20px)", scale: 0.92, opacity: 0 } : { filter: "blur(0px)", scale: 1, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 180, damping: 24, mass: 0.8, delay: 0.1 }}
+      >
         <section className={`hero${hackThemeActive ? ' hero--hack' : ''}${amnaThemeActive ? ' hero--amna' : ''}`} id="hero" style={{ ['--hero-image' as string]: `url(${heroImage})` }}>
           <span className="hero__version" aria-label={`Website version ${WEBSITE_VERSION}`}>{WEBSITE_VERSION}</span>
           <div className="hero__changelog" ref={changelogRef}>
@@ -822,6 +876,7 @@ function App() {
               transition={{ type: 'spring', stiffness: 240, damping: 26, mass: 0.9, delay: 0.12 }}
               whileHover={{ y: -2 }}
             >
+              <LiquidGlassBackdrop />
               <span className="terminal-box__scan" aria-hidden="true" />
               <div className="terminal-box__bar">
                 <span className="terminal-box__window-controls" aria-hidden="true">
@@ -832,8 +887,9 @@ function App() {
                 <span>ROOT@MOHIB:~</span>
               </div>
               <label className="terminal-box__prompt">
-                <span className="terminal-box__symbol">ROOT@MOHIB:/$</span>
+                <span className="terminal-box__symbol font-bold">ROOT@MOHIB:~$</span>
                 <input
+                  type="text"
                   ref={terminalInputRef}
                   value={terminalCommand}
                   onChange={(event) => setTerminalCommand(event.target.value)}
@@ -856,10 +912,10 @@ function App() {
             <motion.div
               key="content-grid"
               id="workflow"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 8 }}
-              transition={{ duration: 0.42, ease: [0.2, 0.8, 0.2, 1] }}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              variants={workflowContainerVariants}
               className={hackThemeActive ? 'hack-draggable' : ''}
               {...hackDrag}
             >
@@ -868,11 +924,12 @@ function App() {
                 title={null}
                 subtitle="A compact overview of my engineering stack and selected builds, arranged in a brutalist scroll workflow."
               >
-                <div className="scroll-journey-shell">
+                <div className="scroll-journey-shell relative z-20">
                   <div className="scroll-journey-shell__left">
                     <h2 className="workflow-column-title">STACKS</h2>
 
-                    <section className="scroll-section scroll-section--about" id="about">
+                    <motion.section variants={workflowItemVariants} className="scroll-section scroll-section--about" id="about">
+                      <LiquidGlassBackdrop />
                       <article className="status-report">
                         <TextScramble as="span" className="status-report__title">[ USER_PROFILE ]</TextScramble>
                         <p className="status-report__longform">
@@ -881,13 +938,14 @@ function App() {
                           I&apos;m also a photographer capturing moments with my Nikon D3500.
                         </p>
                       </article>
-                    </section>
+                    </motion.section>
 
-                    <section className="scroll-section scroll-section--stack" id="stack">
+                    <motion.section variants={workflowItemVariants} className="scroll-section scroll-section--stack" id="stack">
+                      <LiquidGlassBackdrop />
                       <div className="scroll-section__header">
                         <TextScramble as="h2" className="section-label">// TOOL_MATRIX</TextScramble>
                         <p className="scroll-section__lede">
-                          Languages, frameworks, data stores, and creative tooling arranged as the first lane after unlock.
+                          Core technical architecture and deployment tooling.
                         </p>
                       </div>
 
@@ -909,13 +967,14 @@ function App() {
                         ))}
                       </div>
 
-                    </section>
+                    </motion.section>
                   </div>
 
                   <div className="scroll-journey-shell__right">
                     <h2 className="workflow-column-title workflow-column-title--projects">PROJECTS</h2>
 
-                    <section className="scroll-section scroll-section--projects" id="projects">
+                    <motion.section variants={workflowItemVariants} className="scroll-section scroll-section--projects" id="projects">
+                      <LiquidGlassBackdrop />
                       <div
                         className={`selected-output ${selectedActive ? 'selected-output--active' : ''}`}
                         role="button"
@@ -997,7 +1056,7 @@ function App() {
                           </article>
                         ))}
                       </div>
-                    </section>
+                    </motion.section>
                   </div>
                 </div>
 
@@ -1005,6 +1064,7 @@ function App() {
 
                 {renderPipelineVisible && (
                   <section className="render-pipeline render-pipeline--active scroll-section scroll-section--pipeline" id="pipeline">
+                    <LiquidGlassBackdrop />
                     <div className="render-pipeline__frame">
                       <div className="render-pipeline__header">
                         <span className="render-pipeline__label">[ ASCII_RENDER_PIPELINE ]</span>
@@ -1022,7 +1082,7 @@ function App() {
             </motion.div>
           )}
         </AnimatePresence>
-      </main>
+      </motion.main>
 
       <AnimatePresence>
         {!amnaThemeActive && terminalUnlocked && (
@@ -1030,10 +1090,14 @@ function App() {
             key="hover-footer"
             className={`hover-footer${hackThemeActive ? ' hack-draggable' : ''}`}
             id="contact"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 8 }}
-            transition={{ duration: 0.42, ease: [0.2, 0.8, 0.2, 1] }}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            variants={{
+              hidden: { opacity: 0, y: 40 },
+              visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100, damping: 20, delay: 0.8 } },
+              exit: { opacity: 0, y: 12, transition: { duration: 0.3 } }
+            }}
             {...hackDrag}
           >
             <div className="hover-footer__inner">
@@ -1125,8 +1189,70 @@ function App() {
           <ValentineSnakeGame />
         </div>
       )}
+
+      <GlassFilter />
     </div>
   );
 }
 
 export default App;
+
+function LiquidGlassBackdrop() {
+  return (
+    <>
+      <div className="liquid-glass-backdrop absolute top-0 left-0 z-0 h-full w-full rounded-lg 
+          shadow-[0_0_6px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.08),inset_3px_3px_0.5px_-3px_rgba(0,0,0,0.9),inset_-3px_-3px_0.5px_-3px_rgba(0,0,0,0.85),inset_1px_1px_1px_-0.5px_rgba(0,0,0,0.6),inset_-1px_-1px_1px_-0.5px_rgba(0,0,0,0.6),inset_0_0_6px_6px_rgba(0,0,0,0.12),inset_0_0_2px_2px_rgba(0,0,0,0.06),0_0_12px_rgba(255,255,255,0.15)] 
+          transition-all pointer-events-none
+          dark:shadow-[0_0_8px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.08),inset_3px_3px_0.5px_-3.5px_rgba(255,255,255,0.09),inset_-3px_-3px_0.5px_-3.5px_rgba(255,255,255,0.85),inset_1px_1px_1px_-0.5px_rgba(255,255,255,0.6),inset_-1px_-1px_1px_-0.5px_rgba(255,255,255,0.6),inset_0_0_6px_6px_rgba(255,255,255,0.12),inset_0_0_2px_2px_rgba(255,255,255,0.06),0_0_12px_rgba(0,0,0,0.15)]" />
+      <div
+        className="liquid-glass-backdrop absolute top-0 left-0 isolate -z-10 h-full w-full overflow-hidden rounded-lg pointer-events-none"
+        style={{ backdropFilter: 'url("#container-glass")' }}
+      />
+    </>
+  );
+}
+
+function GlassFilter() {
+  return (
+    <svg className="hidden" aria-hidden="true">
+      <defs>
+        <filter
+          id="container-glass"
+          x="0%"
+          y="0%"
+          width="100%"
+          height="100%"
+          colorInterpolationFilters="sRGB"
+        >
+          {/* Generate turbulent noise for distortion */}
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.05 0.05"
+            numOctaves="1"
+            seed="1"
+            result="turbulence"
+          />
+
+          {/* Blur the turbulence pattern slightly */}
+          <feGaussianBlur in="turbulence" stdDeviation="2" result="blurredNoise" />
+
+          {/* Displace the source graphic with the noise */}
+          <feDisplacementMap
+            in="SourceGraphic"
+            in2="blurredNoise"
+            scale="70"
+            xChannelSelector="R"
+            yChannelSelector="B"
+            result="displaced"
+          />
+
+          {/* Apply overall blur on the final result */}
+          <feGaussianBlur in="displaced" stdDeviation="4" result="finalBlur" />
+
+          {/* Output the result */}
+          <feComposite in="finalBlur" in2="finalBlur" operator="over" />
+        </filter>
+      </defs>
+    </svg>
+  );
+}
