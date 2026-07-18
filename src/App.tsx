@@ -60,6 +60,7 @@ const DottedSurface = lazy(() =>
 
 const BackgroundShader = lazy(() => import('./components/ui/background-shader'));
 
+import { AnimatedTerminalMessage } from './components/ui/animated-terminal-message';
 import { GooeyText } from './components/ui/gooey-text-morphing';
 import { AnimatedThemeToggle } from './components/ui/animated-theme-toggle';
 import { ValentineSnakeGame } from './components/ValentineSnakeGame';
@@ -427,6 +428,20 @@ function App() {
 
     return () => window.clearInterval(timer);
   }, [booting]);
+
+  // Any-key to start
+  useEffect(() => {
+    if (started) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore bare modifier keys to prevent accidental starts from system shortcuts
+      if (['Shift', 'Control', 'Alt', 'Meta'].includes(e.key)) return;
+      setStarted(true);
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [started]);
 
   useEffect(() => {
     if (started && !booting) {
@@ -895,7 +910,7 @@ function App() {
               <div className="terminal-box__actions">
                 <button type="submit" className="terminal-box__submit">RUN</button>
               </div>
-              <p className="terminal-box__message">{terminalMessage}</p>
+              <AnimatedTerminalMessage text={terminalMessage} className="terminal-box__message" />
             </motion.form>
           </motion.div>
         </section>
