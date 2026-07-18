@@ -773,7 +773,6 @@ function App() {
                 onToggle={toggleLightDark}
                 className="mac-menu-bar__theme-toggle"
               />
-            </>
           }
         />
       </motion.header>
