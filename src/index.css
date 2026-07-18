@@ -1721,13 +1721,7 @@ button {
   letter-spacing: 0.06em;
 }
 
-.terminal-box__message::after {
-  content: '▍';
-  display: inline-block;
-  margin-left: 0.22rem;
-  color: var(--text);
-  animation: terminal-cursor 1s steps(1, end) infinite;
-}
+
 
 @keyframes terminal-scan {
   0% {

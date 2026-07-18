@@ -410,6 +410,14 @@ function App() {
   }, [booting]);
 
   useEffect(() => {
+    if (started && !booting) {
+      window.setTimeout(() => {
+        terminalInputRef.current?.focus();
+      }, 100);
+    }
+  }, [started, booting]);
+
+  useEffect(() => {
     // Read persisted theme from localStorage if available, otherwise default to light
     const saved = window.localStorage.getItem('portfolio-theme');
     if (saved && ALL_THEME_KEYS.has(saved as ThemeKey)) {
@@ -857,6 +865,7 @@ function App() {
                   onChange={(event) => setTerminalCommand(event.target.value)}
                   autoComplete="off"
                   spellCheck={false}
+                  autoFocus={true}
                   aria-label="Terminal command"
                   placeholder="ACCESS PORTFOLIO"
                 />
