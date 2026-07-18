@@ -681,19 +681,13 @@ function App() {
       <AnimatePresence>
         {!started && (
           <motion.div 
-            className="fixed inset-0 z-[200] flex items-center justify-center bg-[color:var(--bg)] text-[color:var(--text)] font-mono overflow-hidden"
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-[color:var(--bg)] text-[color:var(--text)] font-mono"
             initial={{ opacity: 0, filter: "blur(20px)", scale: 1.08 }}
             animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
             exit={{ opacity: 0, filter: "blur(10px)", scale: 1.05, transition: { duration: 0.5 } }}
             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="absolute inset-0 z-0 opacity-40 pointer-events-none">
-              <Suspense fallback={null}>
-                <DottedSurface />
-              </Suspense>
-            </div>
             <motion.div
-              className="relative z-10"
               whileTap={{ scale: 0.95 }}
               transition={{ type: "spring", stiffness: 400, damping: 25 }}
             >
